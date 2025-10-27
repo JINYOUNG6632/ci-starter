@@ -52,3 +52,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'main';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+// 회원가입 폼, 요청
+$route['auth/register']['get'] = 'auth/register_form';
+$route['auth/register']['post'] = 'auth/register_process';
+
+// 로그인 폼, 요청
+$route['auth/login']['get'] = 'auth/login_form';
+$route['auth/login']['post'] = 'auth/login_process';
+$route['auth/logout'] = 'auth/logout';
