@@ -1,5 +1,7 @@
 <?php
 
+require_once(APPPATH . 'core/Member_Controller.php');
+
 class MY_Controller extends CI_Controller
 {
     # Parameter reference

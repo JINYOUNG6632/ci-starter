@@ -59,7 +59,7 @@ class Posts extends Member_Controller
                 'category_id' => $this->input->post('category_id'),
                 'user_id' => $this->session->userdata('id')
             );
-        };
+        }
 
         $new_post_id = $this->Post_model->create_post($data);
         redirect('posts/view/' . $new_post_id);

@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 // 회원 보안 전용 컨트롤러
-class MY_Member_Controller extends MY_Controller {
+class Member_Controller extends MY_Controller {
 
     public function __construct()
     {
