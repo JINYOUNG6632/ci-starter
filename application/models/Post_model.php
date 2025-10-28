@@ -25,7 +25,7 @@ class Post_model extends MY_Model {
         return $query->row();
     }
 
-    public function get_post_by_category($category_id)
+    public function get_posts_by_category($category_id)
     {
         $this->db->select('posts.id, post.title, posts.created_at, users.username');
         $this->db->from('posts');

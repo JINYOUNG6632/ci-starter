@@ -20,7 +20,7 @@ class Posts extends Member_Controller
 
     public function index($category_id = 1) 
     {
-        $data['posts'] = $this->Post_model->get_post_by_category($category_id);
+        $data['posts'] = $this->Post_model->get_posts_by_category($category_id);
         $data['category'] = $this->Category_model->get_category_by_id($category_id);
 
         $this->load->view('list_view', $data);
