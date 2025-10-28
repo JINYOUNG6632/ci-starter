@@ -66,6 +66,7 @@ class Auth extends MY_Controller
                 $session_data = [
                     'id' => $user->id,
                     'user_id' => $user->user_id,
+                    'username' => $user->username,
                     'logged_in' => TRUE
                 ];
 
