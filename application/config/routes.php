@@ -61,3 +61,7 @@ $route['auth/register']['post'] = 'auth/register_process';
 $route['auth/login']['get'] = 'auth/login_form';
 $route['auth/login']['post'] = 'auth/login_process';
 $route['auth/logout'] = 'auth/logout';
+
+// 글쓰기 폼, 요청
+$route['posts/write']['get'] = 'posts/write_form';
+$route['posts/write']['post'] = 'posts/write_process';
