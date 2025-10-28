@@ -11,6 +11,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Posts extends Member_Controller
 {
+    
+    public $table = 'posts';
+
     public function __construct()
     {
         parent::__construct();
@@ -59,10 +62,10 @@ class Posts extends Member_Controller
                 'category_id' => $this->input->post('category_id'),
                 'user_id' => $this->session->userdata('id')
             );
-        }
 
-        $new_post_id = $this->Post_model->create_post($data);
-        redirect('posts/view/' . $new_post_id);
+            $new_post_id = $this->Post_model->create_post($data);
+            redirect('posts/view/' . $new_post_id);
+        }
     }
 
     public function edit_form($post_id)
