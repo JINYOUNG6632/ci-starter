@@ -7,7 +7,7 @@ class Category_model extends MY_Model {
         parent::__construct();
     }
 
-    public function get_all_categoreis()
+    public function get_all_categories()
     {
         $query = $this->db->get('categories');
         return $query->result_array();
