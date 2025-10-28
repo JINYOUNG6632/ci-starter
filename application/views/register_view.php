@@ -12,6 +12,12 @@
 
     <?php echo form_open('auth/register_process'); ?>
 
+
+        <label for="username">이름 (닉네임)</label>
+        <input type="text" name="username" value="<?php echo set_value('username'); ?>" />
+
+        <br>
+
         <label for="user_id">아이디:</label>
         <input type="text" name="user_id" value="<?php echo set_value('username'); ?>" />
         

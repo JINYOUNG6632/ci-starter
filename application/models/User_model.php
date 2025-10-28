@@ -7,8 +7,9 @@
             parent::__construct();
         }
 
-        public function create_user($user_id, $hashed_password) {
+        public function create_user($username, $user_id, $hashed_password) {
             $data = array(
+                'username' => $username,
                 'user_id' => $user_id,
                 'user_password' => $hashed_password
             );
