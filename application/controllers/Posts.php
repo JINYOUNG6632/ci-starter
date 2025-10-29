@@ -30,9 +30,18 @@ class Posts extends MY_Controller
 
     public function index($category_id = 1)
     {
-        $data['posts']    = $this->Post_model->get_posts_by_category($category_id);
-        $data['category'] = $this->Category_model->get_category_by_id($category_id);
-        $data['title']    = $data['category']->name;
+        $posts    = $this->Post_model->get_posts_by_category($category_id);
+        $category = $this->Category_model->get_category_by_id($category_id);
+
+        $data = [
+            'posts'    => $posts,
+            'category' => $category,
+            'title'    => $category->name,
+
+            'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
+            'CSS'      => '<link rel="stylesheet" href="/ci-starter/assets/css/list_view.css">',
+            'JS'       => '',
+        ];
 
         $this->template_->viewAssign($data);
         $this->template_->viewDefine('content', 'list_view.tpl');
@@ -41,10 +50,16 @@ class Posts extends MY_Controller
 
     public function view($post_id)
     {
-        $data['post']            = $this->Post_model->get_post_by_id($post_id);
-        $data['error']           = $this->session->flashdata('error');
-        $data['session_user_id'] = $this->session->userdata('id');
-        $data['title']           = $data['post'] ? $data['post']->title : '게시글 상세';
+        $post = $this->Post_model->get_post_by_id($post_id);
+
+        $data = [
+            'post'             => $post,
+            'session_user_id'  => $this->session->userdata('id'),
+            'title'            => $post ? $post->title : '게시글 상세',
+            'BASE_CSS'         => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
+            'CSS'              => '<link rel="stylesheet" href="/ci-starter/assets/css/post_detail.css">',
+            'JS'               => '<script src="/ci-starter/assets/js/post_detail.js"></script>',
+        ];
 
         $this->template_->viewAssign($data);
         $this->template_->viewDefine('content', 'post_detail_view.tpl');
@@ -64,11 +79,13 @@ class Posts extends MY_Controller
 
             'categories'            => $categories,
             'selected_category_id'  => set_value('category_id', ''),
-
             'title_value'           => set_value('title', ''),
             'body_value'            => set_value('body', ''),
+            'title'                 => '새 게시글 작성',
 
-            'title'                 => '새 게시글 작성'
+            'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
+            'CSS'      => '<link rel="stylesheet" href="/ci-starter/assets/css/post_form_view.css">',
+            'JS'       => '',
         ];
 
         $this->template_->viewAssign($data);

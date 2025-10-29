@@ -23,10 +23,17 @@ class Auth extends MY_Controller
     }
 
     public function register_form() {
-        $this->template_->viewDefine('content', 'register_view.tpl');
-        $this->template_->viewDefine('layout_empty', 'true');
+    $data = [
+        'error' => $this->session->flashdata('error'),
+        'title' => '회원가입',
+        'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
+        'CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/register_view.css">',
+        'JS' => '',
+    ];
 
-        $this->template_->viewAssign('error', $this->session->flashdata('error'));
+    $this->template_->viewAssign($data);
+    $this->template_->viewDefine('content', 'register_view.tpl');
+    $this->template_->viewDefine('layout_empty', 'true');
     }
 
     public function register_process() {
@@ -52,8 +59,13 @@ class Auth extends MY_Controller
 
     public function login_form() {
         $data = [
-            'error' => $this->session->flashdata('error'),
-            'user_id' => $this->input->post('user_id')
+                'error'   => $this->session->flashdata('error'),
+                'user_id' => $this->input->post('user_id'),
+                'title'   => '로그인',
+
+                'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
+                'CSS'      => '<link rel="stylesheet" href="/ci-starter/assets/css/login_view.css">',
+                'JS'       => '',
         ];
 
         $this->template_->viewAssign($data);
