@@ -19,5 +19,16 @@ class post_controller_constructor
 
         $this->ci->load->library("user_agent");
         define('_IS_MOBILE', $this->ci->agent->is_mobile());
+
+        $this->ci->load->model('Category_model');
+        $all_categories = $this->ci->Category_model->get_all_categories();
+
+        $common_data = array(
+            'header_categories' => $all_categories,
+            'is_logged_in' => $this->ci->session->userdata('logged_in'),
+            'session_username' => $this->ci->session->userdata('username')
+        );
+
+        $this->ci->template_->viewAssign($common_data);
     }
 }
