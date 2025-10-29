@@ -10,6 +10,6 @@ class Main extends MY_Controller
 
     public function index()
     {
-        echo 'hello world';
+        $this->template_->viewDefine('layout_common', 'true');
     }
 }

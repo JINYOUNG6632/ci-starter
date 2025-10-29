@@ -23,7 +23,10 @@ class Auth extends MY_Controller
     }
 
     public function register_form() {
-        $this->load->view('register_view');
+        $this->template_->viewDefine('content', 'register_view.tpl');
+        $this->template_->viewDefine('layout_empty', 'true');
+
+        $this->template_->viewAssign('error', $this->session->flashdata('error'));
     }
 
     public function register_process() {
@@ -32,7 +35,8 @@ class Auth extends MY_Controller
         $this->form_validation->set_rules('user_password', '비밀번호', 'required');
 
         if ($this->form_validation->run() == FALSE) {
-            $this->load->view('register_view');
+            $this->register_form();
+            return;
         } else {
             $username = $this->input->post('username');
             $user_id = $this->input->post('user_id');
@@ -47,7 +51,14 @@ class Auth extends MY_Controller
     }
 
     public function login_form() {
-        $this->load->view('login_view');
+        $data = [
+            'error' => $this->session->flashdata('error'),
+            'user_id' => $this->input->post('user_id')
+        ];
+
+        $this->template_->viewAssign($data);
+        $this->template_->viewDefine('content', 'login_view.tpl');
+        $this->template_->viewDefine('layout_empty', 'true');
     }
 
     public function login_process() {
@@ -55,7 +66,8 @@ class Auth extends MY_Controller
         $this->form_validation->set_rules('user_password', '비밀번호', 'required');
 
         if($this->form_validation->run() == FALSE) {
-            $this->load->view('login_view');
+            $this->login_form();
+            return;
         } else {
             $user_id = $this->input->post('user_id');
             $password = $this->input->post('user_password');
@@ -65,17 +77,17 @@ class Auth extends MY_Controller
             if  ($user) {
                 $session_data = [
                     'id' => $user->id,
-                    'user_id' => $user->user_id,
+                    'user_id' => $user_id,
                     'username' => $user->username,
                     'logged_in' => TRUE
                 ];
 
                 $this->session->set_userdata($session_data);
 
-                redirect('/');
+                redirect('/posts');
             } else {
                 $this->session->set_flashdata('error', '회원정보와 일치하지 않습니다.');
-                redirect('auth/login');
+                redirect('/auth/login'); 
             }
         }
     }
