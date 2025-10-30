@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property CI_Session $session
  * @property Comment_model $Comment_model
  */
-class Comments extends CI_Controller
+class Comments extends MY_Controller
 {
     public function __construct()
     {
