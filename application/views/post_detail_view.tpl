@@ -15,8 +15,11 @@
         {? post->user_id == session_user_id}
             <button type="button" class="btn btn-edit"
                     onclick="location.href='/ci-starter/posts/edit_form/{post->id}'">수정</button>
-            <button type="button" class="btn btn-delete"
-                    onclick="confirmDelete({post->id})">삭제</button>
+            <form action="/ci-starter/posts/delete/{post->id}" method="post"
+                onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
+                style="display:inline;">
+                <button type="submit" class="btn btn-delete">삭제</button>
+            </form>
         {/}
     </div>
 

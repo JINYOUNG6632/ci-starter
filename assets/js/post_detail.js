@@ -32,13 +32,12 @@
         wrapper.className = 'comment-item';
         wrapper.setAttribute('data-comment-id', c.id);
 
-        // soft delete 된 댓글이면 본문 숨김
-        if (c.is_deleted == 1) {
+        if (String(c.is_deleted) === '1') {
             wrapper.innerHTML = '<div class="comment-deleted">삭제된 댓글입니다.</div>';
             return wrapper;
         }
 
-        // 삭제 버튼은 내가 쓴 댓글일 때만
+        // 삭제 버튼 (내가 쓴 댓글만)
         let deleteBtnHtml = '';
         if (c.can_delete === 1 || c.can_delete === true) {
             deleteBtnHtml = `
@@ -72,9 +71,7 @@
             </div>
         `;
 
-        // 하위 댓글(대댓글) 영역
         let childrenHtml = '';
-
         if (c.reply_count > 0) {
             childrenHtml += `
                 <button class="comment-replies-toggle"
@@ -83,11 +80,10 @@
                         data-offset="0"
                         data-reply-count="${c.reply_count}"
                         data-open="0">
-                댓글 ${c.reply_count}개
+                  댓글 ${c.reply_count}개
                 </button>
             `;
         }
-
         childrenHtml += `
             <div class="comment-children" data-parent="${c.id}"></div>
         `;
@@ -130,13 +126,10 @@
     function loadChildComments(parentId, btnEl) {
         if (!parentId) return;
 
-        // 버튼 상태 읽기
         const alreadyLoaded = btnEl.getAttribute('data-loaded'); // "0" 또는 "1"
         let offset = parseInt(btnEl.getAttribute('data-offset'), 10);
         if (isNaN(offset)) offset = 0;
 
-        // 이미 전부 불러왔고 토글만 하고 싶으면 여기서 토글만 처리하는 방식도 가능.
-        // 일단은 서버 계속 호출해서 pagination 지원.
         const url = `/ci-starter/comments/list?post_id=${encodeURIComponent(POST_ID)}&parent_id=${encodeURIComponent(parentId)}&offset=${encodeURIComponent(offset)}&limit=20`;
 
         fetch(url, {
@@ -169,13 +162,9 @@
                 btnEl.setAttribute('data-loaded', '0');
                 btnEl.textContent = '더보기';
             } else {
-                // 더 이상 불러올 게 없으면 loaded=1로 바꿔서
                 btnEl.setAttribute('data-loaded', '1');
                 btnEl.setAttribute('data-open', '1');
                 btnEl.textContent = '닫기';
-
-                // (선택) 이미 로드한 상태에서 다시 누르면 토글만 할 수도 있음
-                // -> 그 로직은 click handler 쪽에서 처리
             }
         })
         .catch(err => {
@@ -276,8 +265,6 @@
                 }
 
                 textarea.value = '';
-
-                // 부모 댓글의 "댓글 보기" 버튼이 있다면 reply_count 증가/텍스트 갱신은 선택적으로 가능
             })
             .catch(err => {
                 console.error(err);
@@ -318,34 +305,32 @@
             });
         }
 
-        // 4) 🔥 "댓글 N개 보기" / "댓글 더보기" 버튼 눌렀을 때
+        // 4) "댓글 N개 보기" / "더보기" 버튼
         if (e.target.classList.contains('comment-replies-toggle')) {
-        const btnEl    = e.target;
-        const parentId = btnEl.getAttribute('data-parent-id');
-        const loaded   = btnEl.getAttribute('data-loaded'); // "0" or "1"
+            const btnEl    = e.target;
+            const parentId = btnEl.getAttribute('data-parent-id');
+            const loaded   = btnEl.getAttribute('data-loaded'); // "0" or "1"
 
-        if (loaded === '1') {
-            const childWrap = document.querySelector('.comment-children[data-parent="' + parentId + '"]');
-            if (childWrap) {
-            const isOpen = btnEl.getAttribute('data-open') === '1';
-            if (isOpen) {
-                // 닫기 → 숨김 + n개
-                childWrap.style.display = 'none';
-                const cnt = btnEl.getAttribute('data-reply-count') || '0';
-                btnEl.textContent = `${cnt}개`;
-                btnEl.setAttribute('data-open', '0');
-            } else {
-                // 열기 → 보임 + 닫기
-                childWrap.style.display = 'block';
-                btnEl.textContent = '닫기';
-                btnEl.setAttribute('data-open', '1');
+            if (loaded === '1') {
+                const childWrap = document.querySelector('.comment-children[data-parent="' + parentId + '"]');
+                if (childWrap) {
+                    const isOpen = btnEl.getAttribute('data-open') === '1';
+                    if (isOpen) {
+                        childWrap.style.display = 'none';
+                        const cnt = btnEl.getAttribute('data-reply-count') || '0';
+                        btnEl.textContent = `${cnt}개`;
+                        btnEl.setAttribute('data-open', '0');
+                    } else {
+                        childWrap.style.display = 'block';
+                        btnEl.textContent = '닫기';
+                        btnEl.setAttribute('data-open', '1');
+                    }
+                }
+                return;
             }
-            }
-            return;
-        }
 
-        // 아직 다 안 불러왔으면 서버 호출
-        loadChildComments(parentId, btnEl);
+            // 아직 다 안 불러왔으면 서버 호출
+            loadChildComments(parentId, btnEl);
         }
     });
 
