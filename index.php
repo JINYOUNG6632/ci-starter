@@ -87,7 +87,7 @@ switch (ENVIRONMENT) {
 
 $application_folder = 'application';
 define('APPFOLDER', $application_folder);
-$resource_folder = $_SERVER["DOCUMENT_ROOT"] . '/resource/';
+$resource_folder = $_SERVER["DOCUMENT_ROOT"] . '/ci-starter/';
 
 /*
  *---------------------------------------------------------------
