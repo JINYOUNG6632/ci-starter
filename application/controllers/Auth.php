@@ -1,7 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-
 /**
  * @property CI_Form_validation $form_validation
  * @property CI_Input $input
@@ -14,7 +13,6 @@ class Auth extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-
         $this->load->model('User_model');
     }
 
@@ -23,17 +21,24 @@ class Auth extends MY_Controller
     }
 
     public function register_form() {
-    $data = [
-        'error' => $this->session->flashdata('error'),
-        'title' => '회원가입',
-        'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
-        'CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/register_view.css">',
-        'JS' => '',
-    ];
+        // 공통 CSS
+        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
 
-    $this->template_->viewAssign($data);
-    $this->template_->viewDefine('content', 'register_view.tpl');
-    $this->template_->viewDefine('layout_empty', 'true');
+        // 화면 전용
+        $this->css('register_view.css', '20251030');
+        $tags = $this->optimizer->makeOptimizerScriptTag();
+
+        $data = [
+            'error'    => $this->session->flashdata('error'),
+            'title'    => '회원가입',
+            'BASE_CSS' => $baseCss,
+            'CSS'      => $tags['css_optimizer'],
+            'JS'       => $tags['js_optimizer'],
+        ];
+
+        $this->template_->viewAssign($data);
+        $this->template_->viewDefine('content', 'register_view.tpl');
+        $this->template_->viewDefine('layout_empty', 'true');
     }
 
     public function register_process() {
@@ -44,28 +49,35 @@ class Auth extends MY_Controller
         if ($this->form_validation->run() == FALSE) {
             $this->register_form();
             return;
-        } else {
-            $username = $this->input->post('username');
-            $user_id = $this->input->post('user_id');
-            $password = $this->input->post('user_password');
-
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            $this->User_model->create_user($username, $user_id, $hashed_password);
-
-            redirect('auth/login');
         }
+
+        $username = $this->input->post('username');
+        $user_id  = $this->input->post('user_id');
+        $password = $this->input->post('user_password');
+
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        $this->User_model->create_user($username, $user_id, $hashed_password);
+
+        redirect('auth/login');
     }
 
     public function login_form() {
-        $data = [
-                'error'   => $this->session->flashdata('error'),
-                'user_id' => $this->input->post('user_id'),
-                'title'   => '로그인',
+        // 공통 CSS
+        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
 
-                'BASE_CSS' => '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">',
-                'CSS'      => '<link rel="stylesheet" href="/ci-starter/assets/css/login_view.css">',
-                'JS'       => '',
+        // 화면 전용
+        $this->css('login_view.css', '20251030');
+        $tags = $this->optimizer->makeOptimizerScriptTag();
+
+        $data = [
+            'error'   => $this->session->flashdata('error'),
+            'user_id' => $this->input->post('user_id'),
+            'title'   => '로그인',
+
+            'BASE_CSS' => $baseCss,
+            'CSS'      => $tags['css_optimizer'],
+            'JS'       => $tags['js_optimizer'],
         ];
 
         $this->template_->viewAssign($data);
@@ -80,27 +92,27 @@ class Auth extends MY_Controller
         if($this->form_validation->run() == FALSE) {
             $this->login_form();
             return;
+        }
+
+        $user_id  = $this->input->post('user_id');
+        $password = $this->input->post('user_password');
+
+        $user = $this->User_model->verify_user($user_id, $password);
+
+        if ($user) {
+            $session_data = [
+                'id'        => $user->id,
+                'user_id'   => $user_id,
+                'username'  => $user->username,
+                'logged_in' => TRUE
+            ];
+
+            $this->session->set_userdata($session_data);
+
+            redirect('/posts');
         } else {
-            $user_id = $this->input->post('user_id');
-            $password = $this->input->post('user_password');
-
-            $user = $this->User_model->verify_user($user_id, $password);
-
-            if  ($user) {
-                $session_data = [
-                    'id' => $user->id,
-                    'user_id' => $user_id,
-                    'username' => $user->username,
-                    'logged_in' => TRUE
-                ];
-
-                $this->session->set_userdata($session_data);
-
-                redirect('/posts');
-            } else {
-                $this->session->set_flashdata('error', '회원정보와 일치하지 않습니다.');
-                redirect('/auth/login'); 
-            }
+            $this->session->set_flashdata('error', '회원정보와 일치하지 않습니다.');
+            redirect('/auth/login'); 
         }
     }
 
