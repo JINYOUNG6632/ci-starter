@@ -73,3 +73,10 @@ $route['comments/list']['get'] = 'comments/list';
 $route['comments/create']['post'] = 'comments/create';
 $route['comments/delete']['post'] = 'comments/delete';
 
+//파일 다운로드
+$route['files/download/(:num)'] = 'files/download/$1';
+//파일 삭제
+$route['files/delete/(:num)'] = 'files/delete/$1';
+
+
+
