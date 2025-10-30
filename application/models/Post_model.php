@@ -5,6 +5,7 @@ class Post_model extends MY_Model {
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('File_model');
     }
 
     public function create_post($data)
@@ -55,6 +56,8 @@ class Post_model extends MY_Model {
         $this->db->where('id', $id)->update('posts', ['is_deleted' => 1]);
 
         $this->db->where('post_id', $id)->update('comments', ['is_deleted' => 1]);
+
+        $this->File_model->soft_delete_by_post($id);
 
         $this->db->trans_complete();
         return $this->db->trans_status();

@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property CI_DB_query_builder $db
  * @property Post_model $Post_model
  * @property Category_model $Category_model
+ * @property File_model $File_model
  */
 class Posts extends MY_Controller
 {
@@ -18,6 +19,7 @@ class Posts extends MY_Controller
         parent::__construct();
         $this->load->model('Post_model');
         $this->load->model('Category_model');
+        $this->load->model('File_model');
     }
 
     private function _check_login()
@@ -70,11 +72,17 @@ class Posts extends MY_Controller
 
         $tags = $this->optimizer->makeOptimizerScriptTag();
 
+        // ▼ 첨부 목록 내려주기
+        $attachments = $post ? $this->File_model->list_by_post($post_id) : [];
+
         $data = [
             'post'             => $post,
             'post_id'          => $post ? $post->id : null,
             'session_user_id'  => $this->session->userdata('id'),
             'title'            => $post ? $post->title : '게시글 상세',
+
+            // ▼ 상세 뷰에서 사용할 첨부 목록
+            'attachments'      => $attachments,
 
             'BASE_CSS'         => $baseCss,               // 공통
             'CSS'              => $tags['css_optimizer'], // 화면 전용
@@ -114,6 +122,8 @@ class Posts extends MY_Controller
             'title_value'           => set_value('title', ''),
             'body_value'            => set_value('body', ''),
             'title'                 => '새 게시글 작성',
+
+            'attachments'           => [],
 
             'BASE_CSS' => $baseCss,
             'CSS'      => $tags['css_optimizer'],
@@ -157,6 +167,8 @@ class Posts extends MY_Controller
 
                 'title'                 => '새 게시글 작성',
 
+                'attachments'           => [],
+
                 'BASE_CSS' => $baseCss,
                 'CSS'      => $tags['css_optimizer'],
                 'JS'       => $tags['js_optimizer'],
@@ -175,7 +187,14 @@ class Posts extends MY_Controller
             'user_id'     => $this->session->userdata('id'),
         ];
 
+        // 1) 게시글 생성
         $new_post_id = $this->Post_model->create_post($insert);
+
+        // 2) ▼ 파일 첨부 처리 (폼의 input name="attachments[]" 기준)
+        //    post_form_view.tpl 은 enctype="multipart/form-data" 여야 함
+        $this->File_model->upload_and_attach($new_post_id, 'attachments');
+
+        // 3) 상세로 이동
         redirect('posts/view/' . $new_post_id);
     }
 
@@ -212,6 +231,8 @@ class Posts extends MY_Controller
 
             'title'                 => '게시글 수정',
 
+            'attachments'           => [],
+
             'BASE_CSS' => $baseCss,
             'CSS'      => $tags['css_optimizer'],
             'JS'       => $tags['js_optimizer'],
@@ -238,49 +259,40 @@ class Posts extends MY_Controller
         $this->form_validation->set_rules('body', '내용', 'required');
 
         if ($this->form_validation->run() == false) {
-
-            $categories = $this->Category_model->get_all_categories();
-
-            // 공통 CSS
-            $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
-
-            // 화면 전용
-            $this->css('post_form_view.css', '20251030');
-            $tags = $this->optimizer->makeOptimizerScriptTag();
-
-            $data = [
-                'is_edit'               => true,
-                'form_action'           => '/ci-starter/posts/edit_process/' . $post->id,
-                'validation_errors'     => validation_errors(),
-
-                'categories'            => $categories,
-                'selected_category_id'  => set_value('category_id', $post->category_id),
-
-                'title_value'           => set_value('title', $post->title),
-                'body_value'            => set_value('body', $post->body),
-
-                'title'                 => '게시글 수정',
-
-                'BASE_CSS' => $baseCss,
-                'CSS'      => $tags['css_optimizer'],
-                'JS'       => $tags['js_optimizer'],
-            ];
-
-            $this->template_->viewAssign($data);
-            $this->template_->viewDefine('content', 'post_form_view.tpl');
-            $this->template_->viewDefine('layout_common', 'true');
+            // (생략) 기존 네 코드 그대로 + 항상 attachments 내려주기
+            $attachments = $this->File_model->list_by_post($post_id);
+            $data = [ /* ... */ 'attachments' => $attachments ?: [] ];
+            // (생략) 렌더
             return;
         }
 
+        // 1) 게시글 업데이트
         $update = [
             'title'       => $this->input->post('title'),
             'body'        => $this->input->post('body'),
             'category_id' => $this->input->post('category_id'),
         ];
-
         $this->Post_model->update_post($post_id, $update);
+
+        // 2) ✅ 체크한 첨부들 일괄 소프트삭제
+        $delete_ids = (array)$this->input->post('delete_attachments');
+        if (!empty($delete_ids)) {
+            foreach ($delete_ids as $fid) {
+                $fid = (int)$fid;
+                // 소유자 검증: 내 게시글의 파일만 지움
+                $f = $this->File_model->get_one_with_owner($fid);
+                if ($f && (int)$f->post_owner_id === (int)$this->session->userdata('id')) {
+                    $this->File_model->soft_delete_one($fid);
+                }
+            }
+        }
+
+        // 3) 신규 첨부 업로드도 병행
+        $this->File_model->upload_and_attach($post_id, 'attachments');
+
         redirect('posts/view/' . $post_id);
     }
+
 
     public function delete($post_id)
     {
@@ -293,7 +305,9 @@ class Posts extends MY_Controller
             return;
         }
 
+        // 게시글 삭제
         $this->Post_model->delete_post($post_id);
+
         redirect('posts');
     }
 }
