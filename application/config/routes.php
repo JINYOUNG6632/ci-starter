@@ -65,8 +65,11 @@ $route['auth/logout'] = 'auth/logout';
 // 글쓰기 폼, 요청
 $route['posts/write']['get'] = 'posts/write_form';
 $route['posts/write']['post'] = 'posts/write_process';
+// 글 삭제
+$route['posts/delete/(:num)'] = 'posts/delete/$1';
 
 // 댓글 crd
 $route['comments/list']['get'] = 'comments/list';
 $route['comments/create']['post'] = 'comments/create';
 $route['comments/delete']['post'] = 'comments/delete';
+
