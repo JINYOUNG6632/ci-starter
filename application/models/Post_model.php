@@ -20,6 +20,7 @@ class Post_model extends MY_Model {
         $this->db->join('users', 'users.id = posts.user_id');
         $this->db->join('categories', 'categories.id = posts.category_id');
         $this->db->where('posts.id', $post_id);
+        $this->db->where('posts.is_deleted', 0);
 
         $query = $this->db->get();
         return $query->row();
@@ -31,6 +32,7 @@ class Post_model extends MY_Model {
         $this->db->from('posts');
         $this->db->join('users', 'users.id = posts.user_id');
         $this->db->where('posts.category_id', $category_id);
+        $this->db->where('posts.is_deleted', 0);
         $this->db->order_by('posts.id', 'DESC');
 
         $query = $this->db->get();
@@ -40,12 +42,22 @@ class Post_model extends MY_Model {
     public function update_post($post_id, $data)
     {
         $this->db->where('posts.id', $post_id);
+        $this->db->where('posts.is_deleted', 0);
         return $this->db->update('posts', $data);
     }
 
-    public function delete_post($post_id)
+    public function delete_post($id)
     {
-        $this->db->where('posts.id', $post_id);
-        return $this->db->delete('posts');
+        $id = (int)$id;
+
+        $this->db->trans_start();
+
+        $this->db->where('id', $id)->update('posts', ['is_deleted' => 1]);
+
+        $this->db->where('post_id', $id)->update('comments', ['is_deleted' => 1]);
+
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
+
 }
