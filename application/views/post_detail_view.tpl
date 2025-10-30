@@ -20,20 +20,7 @@
         {/}
     </div>
 
-    <div class="comment-section">
-        <h3>댓글</h3>
-
-        {? session_user_id}
-            <div class="comment-form">
-                <textarea id="comment-body" placeholder="댓글을 입력하세요..."></textarea>
-                <button id="btn-comment-write" data-post="{post->id}">등록</button>
-            </div>
-        {:}
-            <p class="login-hint">
-                댓글을 작성하려면 <a href="/ci-starter/auth/login">로그인</a>이 필요합니다.
-            </p>
-        {/}
-
-        <div id="comment-list" class="comment-list"></div>
+    <div class="comments-wrapper">
+        {# comment_section }
     </div>
 </div>

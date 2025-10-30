@@ -24,44 +24,54 @@
 }
 
 .post-item {
-    border-bottom: 1px solid #eee;
-    padding: 15px 0;
-    transition: background-color 0.2s;
+  display: block;                
+  text-decoration: none;         
+  color: inherit;                 
+  border-bottom: 1px solid #eee;
+  padding: 15px 0;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  position: relative;
 }
 
 .post-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .post-item:hover {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
-.post-item h3 {
-    margin: 0 0 5px;
-    font-size: 18px;
-    font-weight: 600;
+.post-item:link,
+.post-item:visited {
+  color: inherit;
 }
 
-.post-item h3 a {
-    text-decoration: none;
-    color: #2c3e50;
-    transition: color 0.2s;
+.post-title {
+  margin: 0 0 5px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: color 0.2s;
 }
 
-.post-item h3 a:hover {
-    color: #4CAF50;
+.post-item:hover .post-title {
+  color: #4CAF50;
 }
 
-.post-item p {
-    margin: 0;
-    color: #777;
-    font-size: 14px;
+.post-meta {
+  margin: 0;
+  color: #777;
+  font-size: 14px;
 }
 
-.no-posts {
-    text-align: center;
-    color: #aaa;
-    font-size: 15px;
-    padding: 40px 0;
+.stretched-link {
+  position: absolute;       
+  inset: 0;       
+  z-index: 999;
+  display : block;
+  background: transparent;
+  text-decoration: none;
+  color: inherit;
+  pointer-events: auto;
 }
