@@ -25,7 +25,7 @@ class Auth extends MY_Controller
         $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
 
         // 화면 전용
-        $this->css('register_view.css', '20251030');
+        $this->css('register_view.css', time());
         $tags = $this->optimizer->makeOptimizerScriptTag();
 
         $data = [
@@ -67,7 +67,7 @@ class Auth extends MY_Controller
         $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
 
         // 화면 전용
-        $this->css('login_view.css', '20251030');
+        $this->css('login_view.css', time());
         $tags = $this->optimizer->makeOptimizerScriptTag();
 
         $data = [
