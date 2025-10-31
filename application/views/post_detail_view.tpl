@@ -20,20 +20,16 @@
 
     {# file_view}
 
-    <div class="controls" style="margin-top:12px; display:flex; gap:8px;">
-      <a class="btn btn-list"
-         href="/ci-starter/posts/index/{post->category_id}">목록</a>
+    <div class="controls">
+    <a class="btn btn-list" href="/ci-starter/posts/index/{post->category_id}">목록</a>
 
-      {? post->user_id == session_user_id}
-        <a class="btn btn-edit"
-           href="/ci-starter/posts/edit/{post->id}">수정</a>
+    {? post->user_id == session_user_id}
+        <a class="btn btn-edit" href="/ci-starter/posts/edit/{post->id}">수정</a>
 
-        <form action="/ci-starter/posts/delete/{post->id}" method="post"
-              onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
-              style="display:inline;">
-          <button type="submit" class="btn btn-delete">삭제</button>
+        <form action="/ci-starter/posts/delete/{post->id}" method="post" class="inline-form" onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');">
+        <button type="submit" class="btn btn-delete">삭제</button>
         </form>
-      {/}
+    {/}
     </div>
   </article>
 

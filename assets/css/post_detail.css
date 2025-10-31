@@ -17,8 +17,10 @@
 
 * { box-sizing: border-box; }
 a { color: inherit; text-decoration: none; }
-a:focus-visible,
-button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 2px; }
+a:focus-visible, button:focus-visible {
+  outline: 3px solid rgba(76,175,80,0.35);
+  outline-offset: 2px;
+}
 
 /* ===== Post Detail ===== */
 .post-container {
@@ -66,9 +68,11 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
 .controls {
   margin-top: 25px;
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
+  flex-wrap: wrap;
 }
+
+.inline-form { display: inline-block; margin: 0; }
 
 .btn {
   display: inline-flex;
@@ -80,18 +84,20 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color .2s, box-shadow .2s, transform .03s;
+  transition: background-color .2s, transform .03s;
   box-shadow: 0 1px 0 rgba(0,0,0,0.02);
-  text-decoration: none; /* <a>도 버튼처럼 */
+  text-decoration: none;
+  font-size: 14px;
+  min-width: 84px; /* 버튼 폭 통일 */
+  text-align: center;
 }
-
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 
-.btn-list { background-color: var(--primary); color: #fff; }
+.btn-list   { background-color: var(--primary); color: #fff; }
 .btn-list:hover { background-color: var(--primary-dark); }
 
-.btn-edit { background-color: var(--blue); color: #fff; }
+.btn-edit   { background-color: var(--blue); color: #fff; }
 .btn-edit:hover { background-color: var(--blue-dark); }
 
 .btn-delete { background-color: var(--danger); color: #fff; }
@@ -103,19 +109,13 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   padding-top: 8px;
   border-top: 1px solid #eee;
 }
-
 .post-attachments .section-title {
   font-size: 16px;
   margin: 0 0 8px;
   color: #2c3e50;
 }
 
-.attach-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
+.attach-list { list-style: none; padding: 0; margin: 0; }
 .attach-item {
   display: flex;
   align-items: center;
@@ -123,31 +123,20 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   padding: 8px 0;
   border-bottom: 1px dashed #eee;
 }
-
 .attach-item:last-child { border-bottom: 0; }
 
 .attach-link {
   display: inline-flex;
   align-items: center;
-  text-decoration: none;      /* 언더라인 제거 */
-  color: #2c3e50;
   font-weight: 600;
 }
-
 .attach-link:hover { color: var(--blue); }
 
-.muted,
-.muted small,
-.attach-item .muted {
-  color: #999;
-  font-size: 12px;
-}
+.muted { color: #999; font-size: 12px; }
 
 /* ===== Comments ===== */
 #comment-create-root,
-#comment-list {
-  margin-top: 28px;
-}
+#comment-list { margin-top: 28px; }
 
 .section-title { font-size: 16px; margin: 0 0 10px; }
 
@@ -177,21 +166,56 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   border-radius: 4px;
 }
 
+/* 댓글 헤더: 작성자 왼쪽 / (시간+액션) 오른쪽 */
 .comment-header {
   display: flex;
-  gap: 10px;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
-  color: #666;
+  gap: 12px;
 }
 
 .comment-user { font-weight: 600; color: #2c3e50; }
 .comment-time { font-size: 12px; color: #aaa; }
 
+/* 오른쪽: 시간 + 액션 */
+.comment-meta-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 액션 버튼 inline */
+.comment-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.comment-actions a,
+.comment-actions button {
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s;
+}
+.comment-actions a:hover,
+.comment-actions button:hover {
+  background-color: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* 삭제 폼 inline */
+.comment-delete-form { display: inline; }
+
+/* 본문 */
 .comment-body { margin-top: 6px; }
 .comment-body-text { font-size: 14px; line-height: 1.6; }
 
+/* 삭제된 댓글 */
 .comment-deleted {
   font-size: 13px;
   color: #999;
@@ -201,46 +225,12 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   border-radius: 6px;
 }
 
-.comment-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 6px;
-}
-
-.comment-actions a,
-.comment-actions button,
-.btn-reply-submit,
-.btn-comment-delete,
-.comment-replies-toggle {
-  background: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 5px 9px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color .2s, color .2s, border-color .2s;
-}
-
-.comment-actions a:hover,
-.comment-actions button:hover,
-.btn-reply-submit:hover,
-.btn-comment-delete:hover,
-.comment-replies-toggle:hover {
-  background-color: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-
-/* 들여쓰기(서버에서 inline style로 margin-left px 주는 것과 함께 써도 OK) */
+/* 들여쓰기(서버에서 depth별 margin-left px 추가와 병행 가능) */
 .comment-reply { margin-left: 30px; border-left: 2px solid #e0e0e0; padding-left: 15px; background-color: #fafafa; }
 .comment-reply .comment-reply { margin-left: 25px; border-left-color: #d8d8d8; background-color: #f9f9f9; }
 .comment-reply .comment-reply .comment-reply { margin-left: 20px; background-color: #fdfdfd; border-left-color: #f0f0f0; }
 
 .comment-children { margin-top: 10px; overflow-x: auto; max-width: 100%; }
-
-/* 로그인 힌트 */
-.login-hint { color:#888; }
 
 /* ===== Pagination ===== */
 .pagination {
@@ -249,7 +239,6 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   gap: 8px;
   align-items: center;
 }
-
 .page-link {
   display: inline-flex;
   align-items: center;
@@ -263,9 +252,7 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   color: #333;
   font-size: 14px;
   transition: background-color .2s, border-color .2s, color .2s, transform .03s;
-  text-decoration: none; /* 언더라인 제거 */
 }
-
 .page-link:hover { background: #f6f6f6; border-color: #ccc; }
 .page-counter { color:#666; font-size: 14px; }
 
@@ -277,54 +264,13 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   padding:10px 12px;
   border-radius:6px;
 }
-
 .help-text { color:#8b8b8b; font-size: 12px; }
 
+/* ===== Responsive ===== */
 @media (max-width: 560px) {
   .post-container { padding: 18px; }
   .controls { gap: 8px; }
-  .btn { padding: 9px 14px; }
+  .btn { padding: 9px 14px; min-width: 74px; }
   .post-header h2 { font-size: 20px; }
-  .post-body { font-size:14px; }
+  .post-body { font-size: 14px; }
 }
-
-/* 헤더 좌우 정렬 */
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-/* 오른쪽: 시간 + 액션 */
-.comment-meta-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* 액션 버튼들 inline */
-.comment-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-/* 삭제 폼 inline */
-.comment-delete-form { display: inline; }
-.comment-delete-form button {
-  background: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 5px 9px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.comment-actions a:hover,
-.comment-delete-form button:hover {
-  background-color: #4CAF50;
-  color: #fff;
-  border-color: #4CAF50;
-}
-
