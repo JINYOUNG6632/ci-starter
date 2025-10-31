@@ -67,6 +67,9 @@ $route['posts/write']['get'] = 'posts/write_form';
 $route['posts/write']['post'] = 'posts/write_process';
 // 글 삭제
 $route['posts/delete/(:num)'] = 'posts/delete/$1';
+// 글 수정 폼/요청
+$route['posts/edit/(:num)']['get']  = 'posts/edit_form/$1';
+$route['posts/edit/(:num)']['post'] = 'posts/edit_process/$1';
 
 // 댓글 crd
 $route['comments/list']['get'] = 'comments/list';
