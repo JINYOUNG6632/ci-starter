@@ -238,6 +238,7 @@ a:focus-visible, button:focus-visible {
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content:center;
 }
 .page-link {
   display: inline-flex;
