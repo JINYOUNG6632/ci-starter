@@ -132,7 +132,7 @@ class Posts extends MY_Controller
         $reply_to = $this->input->get('reply_to'); // 해당 댓글 아래에 대댓글 폼 보이기
         $reply_to = ($reply_to === null || $reply_to === '') ? null : (int)$reply_to;
 
-        $commentPage = $this->Comment_model->page_by_post($postId, $page, 50);
+        $commentPage = $this->Comment_model->page_by_post($postId, $page, 10);
 
             $this->db->from('comments');
             $this->db->where('post_id', $postId);
