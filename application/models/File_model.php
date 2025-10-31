@@ -66,7 +66,7 @@ class File_model extends MY_Model
         return $candidate;
     }
 
-    /** 업로드 & DB 저장 (⚠️ 네 스키마 필드명과 인덱스에 100% 맞춤) */
+    /** 업로드 & DB 저장 */
     public function upload_and_attach($post_id, $fieldName = 'attachments'): array
     {
         if (empty($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) {

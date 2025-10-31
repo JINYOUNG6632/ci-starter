@@ -34,9 +34,9 @@ class Files extends MY_Controller
         if (!$file) { show_404(); return; }
 
         $abs  = $file['_abs_path'];
-        $name = $file['original_filename'];        // ✅ 네 스키마명
+        $name = $file['original_filename'];     
         $mime = $file['content_type'] ?: 'application/octet-stream';
-        $size = (int)$file['file_size'];           // ✅ 네 스키마명
+        $size = (int)$file['file_size'];         
 
         // 안전 헤더
         header('Content-Description: File Transfer');
