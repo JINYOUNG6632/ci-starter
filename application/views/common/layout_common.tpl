@@ -19,40 +19,51 @@
 <body>
 
     <header class="site-header">
-        <h1 class="site-title">
-            <a href="/ci-starter/">📋 계층형 게시판</a>
-        </h1>
 
-        <nav class="category-nav">
-            {@ header_categories}
-                <a href="/ci-starter/posts/index/{header_categories->id}">
-                    {header_categories->name}
-                </a>
-            {/}
-        </nav>
+        <!-- 사이트 제목 (맨 위 중앙) -->
+        <div class="site-title-wrap">
+            <h1 class="site-title">
+                <a href="/ci-starter/">📋 계층형 게시판</a>
+            </h1>
+        </div>
 
-        <div class="user-nav">
-            {? is_logged_in}
-                <span>환영합니다, <strong>{session_username}</strong>님!</span>
-                <a href="/ci-starter/auth/logout">로그아웃</a>
-            {:}
-                <a href="/ci-starter/auth/login">로그인</a>
-                <a href="/ci-starter/auth/register">회원가입</a>
-            {/}
+        <!-- 아래: 사용자 / 카테고리 / 글쓰기 -->
+        <div class="header-bar">
+
+            <!-- Left: 환영/로그인 -->
+            <div class="header-left">
+                {? is_logged_in}
+                    <span class="welcome">환영합니다, <strong>{session_username}</strong>님!</span>
+                    <a class="auth-link" href="/ci-starter/auth/logout">로그아웃</a>
+                {:}
+                    <a class="auth-link" href="/ci-starter/auth/login">로그인</a>
+                    <a class="auth-link" href="/ci-starter/auth/register">회원가입</a>
+                {/}
+            </div>
+
+            <!-- Center: 카테고리 -->
+            <div class="header-center">
+                <nav class="category-nav">
+                    {@ header_categories}
+                        <a href="/ci-starter/posts/index/{header_categories->id}">
+                            {header_categories->name}
+                        </a>
+                    {/}
+                </nav>
+            </div>
+
+            <!-- Right: 글쓰기 -->
+            <div class="header-right">
+                {? is_logged_in}
+                    <a href="/ci-starter/posts/write" class="post-button write">📝 글쓰기</a>
+                {:}
+                    <a href="/ci-starter/auth/login" class="post-button login">로그인 후 글쓰기</a>
+                {/}
+            </div>
+
         </div>
     </header>
 
-    <div class="post-button-container">
-        {? is_logged_in}
-            <a href="/ci-starter/posts/write" class="post-button write">
-                📝 게시글 작성하기
-            </a>
-        {:}
-            <a href="/ci-starter/auth/login" class="post-button login">
-                🔐 로그인 후 글쓰기
-            </a>
-        {/}
-    </div>
 
     <main class="main-card">
         {? this->viewDefined('content')}

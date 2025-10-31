@@ -287,3 +287,44 @@ button:focus-visible { outline: 3px solid rgba(76,175,80,0.35); outline-offset: 
   .post-header h2 { font-size: 20px; }
   .post-body { font-size:14px; }
 }
+
+/* 헤더 좌우 정렬 */
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 오른쪽: 시간 + 액션 */
+.comment-meta-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 액션 버튼들 inline */
+.comment-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+/* 삭제 폼 inline */
+.comment-delete-form { display: inline; }
+.comment-delete-form button {
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.comment-actions a:hover,
+.comment-delete-form button:hover {
+  background-color: #4CAF50;
+  color: #fff;
+  border-color: #4CAF50;
+}
+

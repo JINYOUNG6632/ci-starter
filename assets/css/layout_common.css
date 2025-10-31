@@ -1,3 +1,4 @@
+/* Base */
 body {
     font-family: "Noto Sans KR", sans-serif;
     background-color: #f9f9f9;
@@ -6,76 +7,100 @@ body {
     color: #333;
 }
 
-.site-header {
-    background-color: #fff;
-    border-bottom: 2px solid #4CAF50;
-    padding: 20px;
+.site-title-wrap {
+    background: #fff;
+    padding: 18px 0 10px;
     text-align: center;
+    border-bottom: 2px solid #4CAF50;
 }
 
 .site-title {
     margin: 0;
     font-size: 26px;
 }
-
 .site-title a {
     text-decoration: none;
     color: #333;
 }
 
-.category-nav {
-    margin-top: 10px;
+/* ===== Header ===== */
+.site-header {
+    background: #fff;
+    border-bottom: 2px solid #4CAF50;
 }
 
-.category-nav a {
-    margin: 0 8px;
+.header-bar {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto; /* left | center | right */
+    align-items: center;
+    gap: 12px;
+}
+
+/* Left: Login / Welcome */
+.header-left {
+    font-size: 14px;
     color: #555;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-self: start;
+}
+.header-left .welcome strong {
+    font-weight: 700;
+    color: #333;
+}
+.header-left .auth-link {
+    color: #4CAF50;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+}
+.header-left .auth-link:hover {
+    text-decoration: underline;
 }
 
+/* Center: Category menu */
+.header-center {
+    justify-self: center;
+}
+.category-nav {
+    display: inline-flex;
+    align-items: center;
+}
+.category-nav a {
+    padding: 0 12px;
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+    line-height: 28px;
+}
+.category-nav a + a {
+    border-left: 1px solid #ddd; /* vertical separator */
+}
 .category-nav a:hover {
     color: #4CAF50;
 }
 
-.user-nav {
-    padding: 10px 20px;
-    text-align: right;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    background-color: #fafafa;
-    font-size: 14px;
+/* Right: Write button */
+.header-right {
+    justify-self: end;
 }
-
-.user-nav a {
-    margin-left: 10px;
-    color: #4CAF50;
-    text-decoration: none;
-    font-weight: bold;
-}
-.user-nav a:hover {
-    text-decoration: underline;
-}
-
-.post-button-container {
-    text-align: center;
-    margin: 25px 0;
-}
-
 .post-button {
     display: inline-block;
-    padding: 12px 25px;
-    font-size: 15px;
+    padding: 9px 14px;
+    font-size: 14px;
     border-radius: 6px;
     text-decoration: none;
     transition: background-color 0.2s;
 }
 .post-button.write {
     background-color: #4CAF50;
-    color: white;
+    color: #fff;
 }
 .post-button.write:hover {
-    background-color: #45a049;
+    background-color: #43a047;
 }
 .post-button.login {
     background-color: #888;
@@ -85,6 +110,7 @@ body {
     background-color: #666;
 }
 
+/* ===== Main Card ===== */
 .main-card {
     width: 80%;
     max-width: 900px;
@@ -95,6 +121,7 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* ===== Footer ===== */
 .site-footer {
     text-align: center;
     padding: 15px;
@@ -102,4 +129,18 @@ body {
     font-size: 13px;
     border-top: 1px solid #ddd;
     background-color: #fafafa;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 560px) {
+    .header-bar {
+        grid-template-columns: 1fr;
+        row-gap: 8px;
+        text-align: center;
+    }
+    .header-left,
+    .header-center,
+    .header-right {
+        justify-self: center;
+    }
 }
