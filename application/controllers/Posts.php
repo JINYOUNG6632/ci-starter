@@ -41,10 +41,7 @@ class Posts extends MY_Controller
         // --- 검색어 & 페이지 파라미터 -------------------------
         $q       = trim((string)$this->input->get('q', TRUE));
         $perPage = (int)($this->input->get('per_page', TRUE) ?: 10);
-        $page    = (int)($this->input->get('page', TRUE) ?: 1);
         if ($perPage <= 0) $perPage = 10;
-        if ($page <= 0)    $page    = 1;
-        $offset  = ($page - 1) * $perPage;
 
         // --- 카테고리 정보 ------------------------------------
         $category = $this->Category_model->get_category_by_id($category_id);
@@ -53,37 +50,41 @@ class Posts extends MY_Controller
         // Post_model에 count_by_title($q, $category_id)가 있어야 합니다.
         $total = $this->Post_model->count_by_title($q, $category_id);
 
-        // --- 페이지네이션 설정 (쿼리스트링 유지) ---------------
-        $config = [
+        // --- 페이지네이션: 공통 모듈로 치환 --------------------
+        $this->load->library('common_modules', ['pagination_module']);
+        $pg = $this->pagination_module->init([
             'base_url'             => site_url('posts/index/' . $category_id),
             'total_rows'           => $total,
             'per_page'             => $perPage,
+
+            // ↓ 기존과 동일한 동작/마크업 유지
             'page_query_string'    => TRUE,
             'query_string_segment' => 'page',
             'reuse_query_string'   => TRUE,
+            'fixed_window'         => TRUE,
+            'window_size'          => 5,
+            'scale_percent'        => 80,
             'use_page_numbers'     => TRUE,
             'num_links'            => 2,
-
-            'full_tag_open'  => '<ul class="pagination">',
-            'full_tag_close' => '</ul>',
-            'first_tag_open' => '<li class="page-item"><span class="page-link">',
-            'first_tag_close'=> '</span></li>',
-            'last_tag_open'  => '<li class="page-item"><span class="page-link">',
-            'last_tag_close' => '</span></li>',
-            'next_tag_open'  => '<li class="page-item"><span class="page-link">',
-            'next_tag_close' => '</span></li>',
-            'prev_tag_open'  => '<li class="page-item"><span class="page-link">',
-            'prev_tag_close' => '</span></li>',
-            'cur_tag_open'   => '<li class="page-item active"><span class="page-link">',
-            'cur_tag_close'  => '</span></li>',
-            'num_tag_open'   => '<li class="page-item"><span class="page-link">',
-            'num_tag_close'  => '</span></li>',
-        ];
-        $this->pagination->initialize($config);
+            'full_tag_open'        => '<ul class="pagination">',
+            'full_tag_close'       => '</ul>',
+            'first_tag_open'       => '<li class="page-item"><span class="page-link">',
+            'first_tag_close'      => '</span></li>',
+            'last_tag_open'        => '<li class="page-item"><span class="page-link">',
+            'last_tag_close'       => '</span></li>',
+            'next_tag_open'        => '<li class="page-item"><span class="page-link">',
+            'next_tag_close'       => '</span></li>',
+            'prev_tag_open'        => '<li class="page-item"><span class="page-link">',
+            'prev_tag_close'       => '</span></li>',
+            'cur_tag_open'         => '<li class="page-item active"><span class="page-link">',
+            'cur_tag_close'        => '</span></li>',
+            'num_tag_open'         => '<li class="page-item"><span class="page-link">',
+            'num_tag_close'        => '</span></li>',
+        ]);
 
         // --- 목록 데이터 ---------------------------------------
         // Post_model에 list_by_title($limit, $offset, $q, $category_id)가 있어야 합니다.
-        $posts = $this->Post_model->list_by_title($perPage, $offset, $q, $category_id);
+        $posts = $this->Post_model->list_by_title($pg['limit'], $pg['offset'], $q, $category_id);
 
         // 공통 CSS
         $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
@@ -97,10 +98,10 @@ class Posts extends MY_Controller
             'category'   => $category,
             'posts'      => $posts,
             'total'      => $total,
-            'page'       => $page,
-            'per_page'   => $perPage,
+            'page'       => $pg['page'],   // 모듈 계산값
+            'per_page'   => $pg['limit'],  // perPage 그대로
             'q'          => $q,
-            'pagination' => $this->pagination->create_links(),
+            'pagination' => $pg['links'],  // 모듈 생성 HTML
             'BASE_CSS'   => $baseCss,
             'CSS'        => $tags['css_optimizer'],
             'JS'         => $tags['js_optimizer'],
@@ -110,6 +111,7 @@ class Posts extends MY_Controller
         $this->template_->viewDefine('content', 'list_view.tpl');
         $this->template_->viewDefine('layout_common', 'true');
     }
+
 
     /** 상세 + 댓글 서버렌더 페이지네이션(50) */
     public function view($post_id)
