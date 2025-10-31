@@ -6,7 +6,7 @@
       {:}
         <div class="comment-header">
           <span class="comment-user">
-            #{comments->user_id}{? comments->username} ({comments->username}){/}
+            {comments->username}
           </span>
           <span class="comment-time">{comments->created_at}</span>
         </div>
