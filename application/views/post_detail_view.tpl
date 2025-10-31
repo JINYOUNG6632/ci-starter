@@ -1,55 +1,47 @@
+{? !post}
+  <div class="empty-post">존재하지 않는 게시글입니다.</div>
+{:}
+
 <div class="post-container" data-post-id="{post->id}">
+
+  <!-- 게시글 상단 -->
+  <article class="post">
     <div class="post-header">
-        <h2>{post->title}</h2>
-        <div class="post-meta">작성자 : <strong>{post->username}</strong></div>
+      <h2 class="post-title">{post->title}</h2>
+      <div class="post-meta">
+        <span class="post-author">작성자 #{post->user_id}</span>
+        <span class="post-date">{post->created_at}</span>
+      </div>
     </div>
 
     <div class="post-body">
-        {= nl2br(post->body)}
+      {= nl2br(post->body) }
     </div>
 
-    {? attachments}
-    <div class="post-attachments">
-        <h3>첨부파일</h3>
-        <ul class="attach-list">
-            {@ attachments}
-                <li class="attach-item" style="display:flex;align-items:center;gap:8px;">
-                    <a class="attach-link"
-                       href="/ci-starter/files/download/{attachments->id}"
-                       aria-label="{attachments->original_filename}">
-                        {attachments->original_filename}
-                    </a>
-                    <small class="muted">({attachments->file_size} bytes)</small>
+    {# file_view}
 
-                    {? post->user_id == session_user_id}
-                        <!-- 첨부 개별 삭제 (POST /files/delete/{id}) -->
-                        <form action="/ci-starter/files/delete/{attachments->id}" method="post"
-                              onsubmit="return confirm('이 첨부를 삭제할까요?');" style="margin:0;">
-                            <button type="submit" class="btn btn-delete btn-sm">첨부 삭제</button>
-                        </form>
-                    {/}
-                </li>
-            {/}
-        </ul>
+    <div class="controls" style="margin-top:12px; display:flex; gap:8px;">
+      <a class="btn btn-list"
+         href="/ci-starter/posts/index/{post->category_id}">목록</a>
+
+      {? post->user_id == session_user_id}
+        <a class="btn btn-edit"
+           href="/ci-starter/posts/edit/{post->id}">수정</a>
+
+        <form action="/ci-starter/posts/delete/{post->id}" method="post"
+              onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
+              style="display:inline;">
+          <button type="submit" class="btn btn-delete">삭제</button>
+        </form>
+      {/}
     </div>
-    {/}
+  </article>
 
-    <div class="controls">
-        <button type="button" class="btn btn-list"
-                onclick="location.href='/ci-starter/posts/index/{post->category_id}'">목록</button>
+  <hr>
 
-        {? post->user_id == session_user_id}
-            <button type="button" class="btn btn-edit"
-                    onclick="location.href='/ci-starter/posts/edit_form/{post->id}'">수정</button>
-            <form action="/ci-starter/posts/delete/{post->id}" method="post"
-                  onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');"
-                  style="display:inline;">
-                <button type="submit" class="btn btn-delete">삭제</button>
-            </form>
-        {/}
-    </div>
+  <!-- 댓글 섹션: 조각 포함 -->
+  {# comment_section }
 
-    <div class="comments-wrapper">
-        {# comment_section }
-    </div>
 </div>
+
+{/}

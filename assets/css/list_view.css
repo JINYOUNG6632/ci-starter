@@ -1,3 +1,4 @@
+/* === 기존 스타일 그대로 === */
 .board-container {
     max-width: 900px;
     margin: 40px auto;
@@ -24,9 +25,9 @@
 }
 
 .post-item {
-  display: block;                
-  text-decoration: none;         
-  color: inherit;                 
+  display: block;
+  text-decoration: none;
+  color: inherit;
   border-bottom: 1px solid #eee;
   padding: 15px 0;
   transition: background-color 0.2s;
@@ -66,12 +67,88 @@
 }
 
 .stretched-link {
-  position: absolute;       
-  inset: 0;       
+  position: absolute;
+  inset: 0;
   z-index: 999;
-  display : block;
+  display: block;
   background: transparent;
   text-decoration: none;
   color: inherit;
   pointer-events: auto;
+}
+
+/* === 추가: 헤더를 좌우 배치(제목 왼쪽, 검색 오른쪽) === */
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 검색폼 가로 정렬 */
+.board-header .search-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;          /* 헤더 안쪽이라 여백 제거 */
+}
+
+/* 검색 인풋/셀렉트/버튼 공통 */
+.board-header .search-form input[type="text"],
+.board-header .search-form select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* 검색 버튼 */
+.board-header .search-form button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #28a745;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+}
+.board-header .search-form button:hover {
+  background: #218838;
+}
+
+/* 페이지네이션(UL) 기본 간격 */
+.pagination-bottom {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+.pagination {
+  display: inline-flex;
+  gap: 6px;
+  padding-left: 0;
+  list-style: none;
+}
+.pagination .page-link,
+.pagination a,
+.pagination span {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+}
+.pagination .active .page-link,
+.pagination .active span {
+  background: #4CAF50;
+  color: #fff;
+  border-color: #4CAF50;
+}
+.pagination a:hover {
+  background: #f5f5f5;
+}
+
+.comment-count {
+  font-size: 13px;
+  color: #3498db;
+  margin-left: 4px;
+  font-weight: 600;
 }
