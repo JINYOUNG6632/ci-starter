@@ -12,6 +12,8 @@ class MY_Controller extends CI_Controller
     protected $helpers       = [];
     protected $commonModules = [];
 
+    protected $baseCssHref = '/ci-starter/assets/css/layout_common.css';
+
     public function __construct()
     {
         parent::__construct();
@@ -138,6 +140,40 @@ class MY_Controller extends CI_Controller
         }
     }
 
+    /** ------------------------------
+     *  ✅ 공통 뷰 렌더 헬퍼
+     *  - $contentTpl: 본문 템플릿 파일 (예: 'login_view.tpl')
+     *  - $data: 페이지 전용 데이터
+     *  - $layout: 'layout_common' 또는 'layout_empty' 등 레이아웃 키
+     * ------------------------------ */
+    protected function render(string $contentTpl, array $data = [], string $layout = 'layout_common'): void
+    {
+        // 페이지 전용 CSS/JS 등록을 먼저 끝낸 뒤 Optimizer 태그 생성
+        $tags = $this->optimizer->makeOptimizerScriptTag();
+
+        // 전역 기본 데이터 (필요시 여기서 더 추가 가능)
+        $global = [
+            'is_logged_in'     => (bool)$this->session->userdata('logged_in'),
+            'session_username' => (string)$this->session->userdata('username'),
+            'BASE_CSS'         => sprintf('<link rel="stylesheet" href="%s">', $this->baseCssHref),
+            'CSS'              => $tags['css_optimizer'],
+            'JS'               => $tags['js_optimizer'],
+        ];
+
+        // 병합 및 바인딩
+        $this->template_->viewAssign($global + $data);
+        $this->template_->viewDefine('content', $contentTpl);
+        $this->template_->viewDefine($layout, 'true');
+    }
+
+    /** ------------------------------
+     *  ✅ 빈 레이아웃 렌더 (로그인/회원가입 등)
+     * ------------------------------ */
+    protected function renderEmpty(string $contentTpl, array $data = []): void
+    {
+        $this->render($contentTpl, $data, 'layout_empty');
+    }
+
     /**
      * 변수 셋팅
      */
@@ -163,6 +199,7 @@ class MY_Controller extends CI_Controller
         $this->load->vars($aVars);
     }
 
+    /** 로그인 필수 유틸 (원하면 각 컨트롤러에서 호출) */
     protected function _check_login()
     {
         if (!$this->session->userdata('logged_in')) {

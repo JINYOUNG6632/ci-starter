@@ -33,16 +33,14 @@ class Posts extends MY_Controller
         $category = $this->Category_model->get_category_by_id($category_id);
 
         // --- 총 개수(제목 검색 + 카테고리 반영) ----------------
-        // Post_model에 count_by_title($q, $category_id)가 있어야 합니다.
         $total = $this->Post_model->count_by_title($q, $category_id);
 
-        // --- 페이지네이션: 공통 모듈로 치환 --------------------
+        // --- 페이지네이션: 공통 모듈 ---------------------------
         $pg = $this->pagination_module->init([
             'base_url'             => site_url('posts/index/' . $category_id),
             'total_rows'           => $total,
             'per_page'             => $perPage,
 
-            // ↓ 기존과 동일한 동작/마크업 유지
             'page_query_string'    => TRUE,
             'query_string_segment' => 'page',
             'reuse_query_string'   => TRUE,
@@ -68,17 +66,13 @@ class Posts extends MY_Controller
         ]);
 
         // --- 목록 데이터 ---------------------------------------
-        // Post_model에 list_by_title($limit, $offset, $q, $category_id)가 있어야 합니다.
         $posts = $this->Post_model->list_by_title($pg['limit'], $pg['offset'], $q, $category_id);
 
-        // 공통 CSS
-        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
-
-        // 화면 전용 CSS/JS는 Optimizer 사용
+        // 페이지 전용 CSS
         $this->css('list_view.css', time());
-        $tags = $this->optimizer->makeOptimizerScriptTag();
 
-        $data = [
+        // 화면 렌더
+        $this->render('list_view.tpl', [
             'title'      => $category ? $category->name : '게시글 목록',
             'category'   => $category,
             'posts'      => $posts,
@@ -87,29 +81,17 @@ class Posts extends MY_Controller
             'per_page'   => $pg['limit'],  // perPage 그대로
             'q'          => $q,
             'pagination' => $pg['links'],  // 모듈 생성 HTML
-            'BASE_CSS'   => $baseCss,
-            'CSS'        => $tags['css_optimizer'],
-            'JS'         => $tags['js_optimizer'],
-        ];
-
-        $this->template_->viewAssign($data);
-        $this->template_->viewDefine('content', 'list_view.tpl');
-        $this->template_->viewDefine('layout_common', 'true');
+        ]);
     }
 
-
-    /** 상세 + 댓글 서버렌더 페이지네이션(50) */
+    /** 상세 + 댓글 서버렌더 페이지네이션(10) */
     public function view($post_id)
     {
         $postId = (int)$post_id;
         $post   = $this->Post_model->get_post_by_id($postId);
 
-        // 공통 CSS
-        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
-
+        // 페이지 전용 CSS
         $this->css('post_detail.css', time());
-
-        $tags = $this->optimizer->makeOptimizerScriptTag();
 
         // 첨부 목록
         $attachments = $post ? $this->File_model->list_by_post($postId) : [];
@@ -121,41 +103,32 @@ class Posts extends MY_Controller
 
         $commentPage = $this->Comment_model->page_by_post($postId, $page, 10);
 
-            $this->db->from('comments');
-            $this->db->where('post_id', $postId);
-            $this->db->where('is_deleted', 0);
-            $total_comment_count = (int) $this->db->count_all_results();
+        // 총 댓글 수 (기존 로직 유지)
+        $this->db->from('comments');
+        $this->db->where('post_id', $postId);
+        $this->db->where('is_deleted', 0);
+        $total_comment_count = (int)$this->db->count_all_results();
 
-        $data = [
-            'post'             => $post,
-            'post_id'          => $post ? $post->id : null,
-            'session_user_id'  => $this->session->userdata('id'),
-            'title'            => $post ? $post->title : '게시글 상세',
+        // 부분 템플릿(파셜) 매핑
+        $this->template_->viewDefine('comment_section',   'comment_section.tpl');
+        $this->template_->viewDefine('comment_form',      'comment_form.tpl');
+        $this->template_->viewDefine('comment_list_stub', 'comment_list_stub.tpl');
+        $this->template_->viewDefine('file_view',         'file_view.tpl');
 
-            'attachments'      => $attachments,
-
-            // 댓글 데이터 (서버 렌더)
-            'comments'         => $commentPage['rows'],
-            'page'             => $commentPage['page'],
-            'total_pages'      => $commentPage['total_pages'],
-            'page_size'        => $commentPage['page_size'],
-            'reply_to'         => $reply_to,
-
+        // 화면 렌더
+        $this->render('post_detail_view.tpl', [
+            'post'                => $post,
+            'post_id'             => $post ? $post->id : null,
+            'session_user_id'     => $this->session->userdata('id'),
+            'title'               => $post ? $post->title : '게시글 상세',
+            'attachments'         => $attachments,
+            'comments'            => $commentPage['rows'],
+            'page'                => $commentPage['page'],
+            'total_pages'         => $commentPage['total_pages'],
+            'page_size'           => $commentPage['page_size'],
+            'reply_to'            => $reply_to,
             'total_comment_count' => $total_comment_count,
-
-            'BASE_CSS'         => $baseCss,
-            'CSS'              => $tags['css_optimizer'],
-            'JS'               => $tags['js_optimizer'],
-        ];
-
-        $this->template_->viewAssign($data);
-        $this->template_->viewDefine('content', 'post_detail_view.tpl');
-        $this->template_->viewDefine('comment_section',    'comment_section.tpl');
-        $this->template_->viewDefine('comment_form',       'comment_form.tpl');
-        $this->template_->viewDefine('comment_list_stub',  'comment_list_stub.tpl');
-        $this->template_->viewDefine('file_view', 'file_view.tpl');
-
-        $this->template_->viewDefine('layout_common', 'true');
+        ]);
     }
 
     /** 작성 폼 */
@@ -165,30 +138,20 @@ class Posts extends MY_Controller
 
         $categories = $this->Category_model->get_all_categories();
 
-        // 공통 CSS
-        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
-        // 화면 전용
+        // 페이지 전용 CSS
         $this->css('post_form_view.css', time());
-        $tags = $this->optimizer->makeOptimizerScriptTag();
 
-        $data = [
-            'is_edit'               => false,
-            'form_action'           => '/ci-starter/posts/write_process',
-            'validation_errors'     => validation_errors(),
-            'categories'            => $categories,
-            'selected_category_id'  => set_value('category_id', ''),
-            'title_value'           => set_value('title', ''),
-            'body_value'            => set_value('body', ''),
-            'title'                 => '새 게시글 작성',
-            'attachments'           => [],
-            'BASE_CSS'              => $baseCss,
-            'CSS'                   => $tags['css_optimizer'],
-            'JS'                   => $tags['js_optimizer'],
-        ];
-
-        $this->template_->viewAssign($data);
-        $this->template_->viewDefine('content', 'post_form_view.tpl');
-        $this->template_->viewDefine('layout_common', 'true');
+        $this->render('post_form_view.tpl', [
+            'is_edit'              => false,
+            'form_action'          => '/ci-starter/posts/write_process',
+            'validation_errors'    => validation_errors(),
+            'categories'           => $categories,
+            'selected_category_id' => set_value('category_id', ''),
+            'title_value'          => set_value('title', ''),
+            'body_value'           => set_value('body', ''),
+            'title'                => '새 게시글 작성',
+            'attachments'          => [],
+        ]);
     }
 
     /** 작성 처리 */
@@ -231,35 +194,25 @@ class Posts extends MY_Controller
         if (!$post || $post->user_id != $this->session->userdata('id')) {
             $this->session->set_flashdata('error', '수정권한이 없습니다.');
             redirect('posts/view/' . $post_id);
-            exit;;
+            exit;
         }
 
         $categories  = $this->Category_model->get_all_categories();
         $attachments = $this->File_model->list_by_post($post_id);
 
-        // 공통 CSS
-        $baseCss = '<link rel="stylesheet" href="/ci-starter/assets/css/layout_common.css">';
         $this->css('post_form_view.css', time());
-        $tags = $this->optimizer->makeOptimizerScriptTag();
 
-        $data = [
-            'is_edit'               => true,
-            'form_action'           => '/ci-starter/posts/edit_process/' . $post->id,
-            'validation_errors'     => validation_errors(),
-            'categories'            => $categories,
-            'selected_category_id'  => set_value('category_id', $post->category_id),
-            'title_value'           => set_value('title', $post->title),
-            'body_value'            => set_value('body', $post->body),
-            'title'                 => '게시글 수정',
-            'attachments'           => $attachments ?: [],
-            'BASE_CSS'              => $baseCss,
-            'CSS'                   => $tags['css_optimizer'],
-            'JS'                    => $tags['js_optimizer'],
-        ];
-
-        $this->template_->viewAssign($data);
-        $this->template_->viewDefine('content', 'post_form_view.tpl');
-        $this->template_->viewDefine('layout_common', 'true');
+        $this->render('post_form_view.tpl', [
+            'is_edit'              => true,
+            'form_action'          => '/ci-starter/posts/edit_process/' . $post->id,
+            'validation_errors'    => validation_errors(),
+            'categories'           => $categories,
+            'selected_category_id' => set_value('category_id', $post->category_id),
+            'title_value'          => set_value('title', $post->title),
+            'body_value'           => set_value('body', $post->body),
+            'title'                => '게시글 수정',
+            'attachments'          => $attachments ?: [],
+        ]);
     }
 
     /** 수정 처리 */

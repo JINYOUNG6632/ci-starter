@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Comments extends MY_Controller
 {
 
-    protected $models        = ['Comment_model'];
+    protected $models = ['Comment_model'];
 
     public function __construct()
     {

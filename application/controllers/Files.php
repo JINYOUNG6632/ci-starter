@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Files extends MY_Controller
 {
 
-    protected $models        = ['File_model'];
+    protected $models = ['File_model'];
 
     public function __construct()
     {
