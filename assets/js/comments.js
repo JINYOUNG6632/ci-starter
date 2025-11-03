@@ -65,41 +65,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------------- Page Loader ---------------------- */
 
+  // 기존 loadPage 전체를 이걸로 교체
   const loadPage = async (p, replyTo = '') => {
-    const query =
-      `/ci-starter/comments/page?post_id=${getPostId()}&page=${p}`
-      + (replyTo ? `&reply_to=${replyTo}` : '');
-
-    const res = await fetch(query, {
-      headers: { 'X-Requested-With':'XMLHttpRequest' }
-    });
-
+    const res = await fetch(
+      `/ci-starter/comments/page?post_id=${getPostId()}&page=${p}` + (replyTo ? `&reply_to=${replyTo}` : ''),
+      { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
+    );
     const json = await res.json();
     if (!json.ok) {
       alert(json.msg || '댓글 페이지 로드 실패');
       return;
     }
 
-    // 리스트 교체
-    document.querySelector('#comment-list').innerHTML = json.data.list_html;
+    // 1) 리스트 컨테이너 보장: 없으면 생성해서 pagination 앞(또는 맨 끝)에 끼워넣기
+    let listEl = document.querySelector('#comment-list');
+    if (!listEl) {
+      listEl = document.createElement('section');
+      listEl.id = 'comment-list';
 
-    // "첫 댓글" 안내 제거
-    const listHasItems = !!document.querySelector('#comment-list .comment-item');
-    const emptyNotice = section.querySelector('.no-comments');
-    if (listHasItems && emptyNotice) emptyNotice.remove();
-
-    // 페이지네이션 갱신
-    updatePagination(json.data.page, json.data.total_pages);
-
-    // ✅ 헤더 카운트 갱신(삭제 제외 카운트)
-    if (json.data.total_count_active !== undefined) {
-      updateHeader(json.data.total_count_active);
+      const pag = section.querySelector('.pagination');
+      if (pag && pag.parentNode === section) {
+        section.insertBefore(listEl, pag);  // pagination 위에 위치
+      } else {
+        section.appendChild(listEl);
+      }
     }
 
-    // 주소창 sync
+    // 2) 리스트 교체
+    listEl.innerHTML = json.data.list_html;
+
+    // 3) "첫 댓글을 남겨보세요" 제거 조건
+    //    서버가 active 카운트를 내려줄 경우 그걸로, 없으면 DOM에 아이템 존재 여부로 판단
+    const emptyNotice = section.querySelector('.no-comments');
+    const activeCount = json.data.total_count_active;
+    const hasItems = !!listEl.querySelector('.comment-item');
+
+    if ((typeof activeCount === 'number' && activeCount > 0) || hasItems) {
+      emptyNotice && emptyNotice.remove();
+    }
+
+    // 4) 페이지네이션 갱신
+    updatePagination(json.data.page, json.data.total_pages);
+
+    // 5) 헤더 카운트(가능하면 active 기준으로)
+    if (typeof activeCount === 'number') {
+      updateHeader(activeCount);
+    } else if (typeof json.data.total_count === 'number') {
+      updateHeader(json.data.total_count);
+    }
+
+    // 6) 주소창 동기화 (reply_to 유지, 해시는 넣지 않음 → 깜빡임 방지)
     const u = new URL(location.href);
     u.searchParams.set('page', json.data.page);
-    history.replaceState(null, '', u);
+    if (replyTo) u.searchParams.set('reply_to', replyTo);
+    else u.searchParams.delete('reply_to');
+    history.replaceState(null, '', `${u.pathname}${u.search}`);
   };
 
   /* ---------------------- Create Logic ---------------------- */
@@ -112,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const d = json.data;
 
     // 헤더 갱신
-    updateHeader(d.total_count_active);
+    updateHeader(d.total_count_active ?? d.total_count ?? 0);
+    await loadPage(d.page);
 
     // 서버가 계산한 실제 페이지로 조각 reload
     const replyTo = new URL(location.href).searchParams.get('reply_to') || '';
