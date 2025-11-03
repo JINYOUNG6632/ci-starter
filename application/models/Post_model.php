@@ -25,7 +25,8 @@ class Post_model extends MY_Model {
         $this->db->from('posts');
         $this->db->join('users', 'users.id = posts.user_id');
         $this->db->join('categories', 'categories.id = posts.category_id');
-        $this->db->where('posts.id', $post_id);
+        $this->db->where('posts.id', (int)$post_id);
+        // ✅ 삭제된 글 제외
         $this->db->where('posts.is_deleted', 0);
 
         $query = $this->db->get();
@@ -37,7 +38,8 @@ class Post_model extends MY_Model {
         $this->db->select('posts.id, posts.title, posts.created_at, users.username');
         $this->db->from('posts');
         $this->db->join('users', 'users.id = posts.user_id');
-        $this->db->where('posts.category_id', $category_id);
+        $this->db->where('posts.category_id', (int)$category_id);
+        // ✅ 삭제된 글 제외
         $this->db->where('posts.is_deleted', 0);
         $this->db->order_by('posts.id', 'DESC');
 
@@ -47,7 +49,8 @@ class Post_model extends MY_Model {
 
     public function update_post($post_id, $data)
     {
-        $this->db->where('posts.id', $post_id);
+        $this->db->where('posts.id', (int)$post_id);
+        // ✅ 삭제된 글은 업데이트 불가
         $this->db->where('posts.is_deleted', 0);
         return $this->db->update('posts', $data);
     }
@@ -58,7 +61,9 @@ class Post_model extends MY_Model {
 
         $this->db->trans_start();
 
+        // ✅ 소프트 삭제
         $this->db->where('id', $id)->update('posts', ['is_deleted' => 1]);
+        // 댓글/파일도 화면에서 숨기고 싶다면 같이 소프트 삭제
         $this->db->where('post_id', $id)->update('comments', ['is_deleted' => 1]);
         $this->File_model->soft_delete_by_post($id);
 
@@ -69,6 +74,7 @@ class Post_model extends MY_Model {
     public function count_by_title(string $q = '', ?int $category_id = null): int
     {
         $this->db->from('posts');
+        // ✅ 삭제된 글 제외
         $this->db->where('is_deleted', 0);
         if (!empty($category_id)) {
             $this->db->where('category_id', (int)$category_id);
@@ -81,11 +87,11 @@ class Post_model extends MY_Model {
 
     public function list_by_title(int $limit, int $offset, string $q = '', int $category_id = 0)
     {
-        // 댓글 수 집계 서브쿼리
+        // 댓글 수 집계 서브쿼리 (삭제되지 않은 댓글만)
         $sub = $this->db
             ->select('post_id, COUNT(*) AS cnt', false)
             ->from('comments')
-            ->where('is_deleted', 0)      // 쓰는 중이면
+            ->where('is_deleted', 0)
             ->group_by('post_id')
             ->get_compiled_select();
 
@@ -102,13 +108,15 @@ class Post_model extends MY_Model {
             ->join('users AS u', 'u.id = p.user_id', 'left')
             ->join("({$sub}) AS c", 'c.post_id = p.id', 'left');
 
+        // ✅ 삭제된 글 제외 (핵심 한 줄)
+        $this->db->where('p.is_deleted', 0);
+
         if ($category_id > 0) {
-            $this->db->where('p.category_id', $category_id);
+            $this->db->where('p.category_id', (int)$category_id);
         }
         if ($q !== '') {
             $this->db->like('p.title', $q);
         }
-        // $this->db->where('p.is_deleted', 0); // 쓰고 있다면
 
         return $this->db
             ->order_by('p.id', 'DESC')
