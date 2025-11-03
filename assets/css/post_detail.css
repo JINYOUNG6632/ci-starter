@@ -51,7 +51,6 @@ a:focus-visible, button:focus-visible {
   margin-top: 8px;
   color: var(--muted);
   font-size: 14px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -75,7 +74,6 @@ a:focus-visible, button:focus-visible {
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .inline-form { display: inline-block; margin: 0; }
 
 .btn {
@@ -92,50 +90,26 @@ a:focus-visible, button:focus-visible {
   box-shadow: 0 1px 0 rgba(0,0,0,0.02);
   text-decoration: none;
   font-size: 14px;
-  min-width: 84px; /* 버튼 폭 통일 */
+  min-width: 84px;
   text-align: center;
 }
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
-
 .btn-list   { background-color: var(--primary); color: #fff; }
 .btn-list:hover { background-color: var(--primary-dark); }
-
 .btn-edit   { background-color: var(--blue); color: #fff; }
 .btn-edit:hover { background-color: var(--blue-dark); }
-
 .btn-delete { background-color: var(--danger); color: #fff; }
 .btn-delete:hover { background-color: var(--danger-dark); }
 
 /* ===== Attachments ===== */
-.post-attachments {
-  margin-top: 18px;
-  padding-top: 8px;
-  border-top: 1px solid #eee;
-}
-.post-attachments .section-title {
-  font-size: 16px;
-  margin: 0 0 8px;
-  color: #2c3e50;
-}
-
+.post-attachments { margin-top: 18px; padding-top: 8px; border-top: 1px solid #eee; }
+.post-attachments .section-title { font-size: 16px; margin: 0 0 8px; color: #2c3e50; }
 .attach-list { list-style: none; padding: 0; margin: 0; }
-.attach-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px dashed #eee;
-}
+.attach-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #eee; }
 .attach-item:last-child { border-bottom: 0; }
-
-.attach-link {
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-}
+.attach-link { display: inline-flex; align-items: center; font-weight: 600; }
 .attach-link:hover { color: var(--blue); }
-
 .muted { color: #999; font-size: 12px; }
 
 /* ===== Comments ===== */
@@ -144,56 +118,80 @@ a:focus-visible, button:focus-visible {
 
 .section-title { font-size: 16px; margin: 0 0 10px; }
 
+/* Forms (root & reply) */
+.comment-form-root,
+.comment-form-reply {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px;
+}
 .comment-form-root textarea,
 .comment-form-reply textarea {
   width: 100%;
   min-height: 100px;
-  padding: 10px;
-  border: 1px solid #ccc;
+  padding: 10px 12px;
+  border: 1px solid #cfcfcf;
   border-radius: 6px;
   resize: vertical;
   font-size: 14px;
+  line-height: 1.5;
+  background: #fff;
 }
-
+.comment-form-root textarea:focus,
+.comment-form-reply textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(76,175,80,.12);
+}
 .comment-form-root .form-actions,
 .comment-form-reply .form-actions {
   margin-top: 10px;
   display: flex;
   gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
+.comment-form-reply { margin-top: 8px; }
 
+/* List items */
 #comment-list .comment-item {
   border-bottom: 1px solid #eee;
   padding: 12px 0;
   margin-bottom: 8px;
   background-color: #fff;
   border-radius: 4px;
+  position: relative;              /* reserve space for actions */
+  padding-right: 96px;             /* keep right-top clear for buttons */
+  box-sizing: border-box;
 }
 
-/* 댓글 헤더: 작성자 왼쪽 / (시간+액션) 오른쪽 */
+/* Header layout */
 .comment-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
 }
-
 .comment-user { font-weight: 600; color: #2c3e50; }
 .comment-time { font-size: 12px; color: #aaa; }
 
-/* 오른쪽: 시간 + 액션 */
+/* Right area: time + actions */
 .comment-meta-right {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
-/* 액션 버튼 inline */
+/* Actions: fixed to top-right of each item (prevents overlap with time) */
 .comment-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  flex-direction: column;          /* stack vertically when tight */
 }
 .comment-actions a,
 .comment-actions button {
@@ -204,6 +202,8 @@ a:focus-visible, button:focus-visible {
   font-size: 12px;
   cursor: pointer;
   transition: background-color .2s, color .2s, border-color .2s;
+  min-width: 48px;
+  text-align: center;
 }
 .comment-actions a:hover,
 .comment-actions button:hover {
@@ -212,14 +212,14 @@ a:focus-visible, button:focus-visible {
   border-color: var(--primary);
 }
 
-/* 삭제 폼 inline */
+/* inline delete form */
 .comment-delete-form { display: inline; }
 
-/* 본문 */
+/* Body */
 .comment-body { margin-top: 6px; }
 .comment-body-text { font-size: 14px; line-height: 1.6; }
 
-/* 삭제된 댓글 */
+/* Deleted placeholder */
 .comment-deleted {
   font-size: 13px;
   color: #999;
@@ -229,12 +229,17 @@ a:focus-visible, button:focus-visible {
   border-radius: 6px;
 }
 
-/* 들여쓰기(서버에서 depth별 margin-left px 추가와 병행 가능) */
+/* Indentation helpers */
 .comment-reply { margin-left: 30px; border-left: 2px solid #e0e0e0; padding-left: 15px; background-color: #fafafa; }
 .comment-reply .comment-reply { margin-left: 25px; border-left-color: #d8d8d8; background-color: #f9f9f9; }
 .comment-reply .comment-reply .comment-reply { margin-left: 20px; background-color: #fdfdfd; border-left-color: #f0f0f0; }
-
 .comment-children { margin-top: 10px; overflow-x: auto; max-width: 100%; }
+
+/* Optional depth clamp (enable by setting style="--depth:N") */
+#comment-list .comment-item { /* keeps inline margin-left if you use it */
+  /* If you also pass --depth, this caps visual indent at 12 levels (12*24px). */
+  margin-left: calc(min(var(--depth, -1), 12) * 24px);
+}
 
 /* ===== Pagination ===== */
 .pagination {
@@ -242,7 +247,8 @@ a:focus-visible, button:focus-visible {
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content:center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .page-link {
   display: inline-flex;
@@ -257,8 +263,11 @@ a:focus-visible, button:focus-visible {
   color: #333;
   font-size: 14px;
   transition: background-color .2s, border-color .2s, color .2s, transform .03s;
+  text-decoration: none;
 }
 .page-link:hover { background: #f6f6f6; border-color: #ccc; }
+.page-link[disabled], .page-link.is-disabled { opacity: .5; pointer-events: none; }
+.page-link.is-active { background: var(--primary); border-color: var(--primary); color: #fff; }
 .page-counter { color:#666; font-size: 14px; }
 
 /* ===== Utilities ===== */
@@ -278,4 +287,8 @@ a:focus-visible, button:focus-visible {
   .btn { padding: 9px 14px; min-width: 74px; }
   .post-header h2 { font-size: 20px; }
   .post-body { font-size: 14px; }
+
+  /* actions compact on small screens */
+  #comment-list .comment-item { padding-right: 88px; }
+  .comment-actions { top: 8px; right: 6px; gap: 4px; }
 }

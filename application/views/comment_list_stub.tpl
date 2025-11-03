@@ -1,6 +1,6 @@
 <section id="comment-list">
   {@ comments}
-    <div id="c{comments->id}" class="comment-item" style="margin-left:{= comments->depth * 24 }px">
+    <div id="c{comments->id}" class="comment-item" style="--depth:{comments->depth}">
       {? comments->is_deleted == 1}
         <div class="comment-deleted">삭제된 댓글입니다.</div>
       {:}
