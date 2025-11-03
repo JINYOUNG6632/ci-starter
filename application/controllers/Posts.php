@@ -21,68 +21,28 @@ class Posts extends MY_Controller
         parent::__construct();
     }
 
-    /** 목록 */
     public function index($category_id = 1)
     {
-        // --- 검색어 & 페이지 파라미터 -------------------------
-        $q       = trim((string)$this->input->get('q', TRUE));
-        $perPage = (int)($this->input->get('per_page', TRUE) ?: 10);
-        if ($perPage <= 0) $perPage = 10;
-
-        // --- 카테고리 정보 ------------------------------------
+        $q = trim((string)$this->input->get('q', TRUE));
         $category = $this->Category_model->get_category_by_id($category_id);
 
-        // --- 총 개수(제목 검색 + 카테고리 반영) ----------------
-        $total = $this->Post_model->count_by_title($q, $category_id);
-
-        // --- 페이지네이션: 공통 모듈 ---------------------------
-        $pg = $this->pagination_module->init([
-            'base_url'             => site_url('posts/index/' . $category_id),
-            'total_rows'           => $total,
-            'per_page'             => $perPage,
-
-            'page_query_string'    => TRUE,
-            'query_string_segment' => 'page',
-            'reuse_query_string'   => TRUE,
-            'fixed_window'         => TRUE,
-            'window_size'          => 5,
-            'scale_percent'        => 80,
-            'use_page_numbers'     => TRUE,
-            'num_links'            => 2,
-            'full_tag_open'        => '<ul class="pagination">',
-            'full_tag_close'       => '</ul>',
-            'first_tag_open'       => '<li class="page-item"><span class="page-link">',
-            'first_tag_close'      => '</span></li>',
-            'last_tag_open'        => '<li class="page-item"><span class="page-link">',
-            'last_tag_close'       => '</span></li>',
-            'next_tag_open'        => '<li class="page-item"><span class="page-link">',
-            'next_tag_close'       => '</span></li>',
-            'prev_tag_open'        => '<li class="page-item"><span class="page-link">',
-            'prev_tag_close'       => '</span></li>',
-            'cur_tag_open'         => '<li class="page-item active"><span class="page-link">',
-            'cur_tag_close'        => '</span></li>',
-            'num_tag_open'         => '<li class="page-item"><span class="page-link">',
-            'num_tag_close'        => '</span></li>',
-        ]);
-
-        // --- 목록 데이터 ---------------------------------------
+        $pg = $this->pagination_module->for_posts($category_id, $q, 10);
         $posts = $this->Post_model->list_by_title($pg['limit'], $pg['offset'], $q, $category_id);
 
-        // 페이지 전용 CSS
         $this->css('list_view.css', time());
 
-        // 화면 렌더
         $this->render('list_view.tpl', [
             'title'      => $category ? $category->name : '게시글 목록',
             'category'   => $category,
             'posts'      => $posts,
-            'total'      => $total,
-            'page'       => $pg['page'],   // 모듈 계산값
-            'per_page'   => $pg['limit'],  // perPage 그대로
+            'total'      => $pg['total'],
+            'page'       => $pg['page'],
+            'per_page'   => $pg['limit'],
             'q'          => $q,
-            'pagination' => $pg['links'],  // 모듈 생성 HTML
+            'pagination' => $pg['links'],
         ]);
     }
+
 
     /** 상세 + 댓글 서버렌더 페이지네이션(10) */
     public function view($post_id)

@@ -79,36 +79,40 @@ class Post_model extends MY_Model {
         return (int)$this->db->count_all_results();
     }
 
-    public function list_by_title(int $limit, int $offset, string $q = '', ?int $category_id = null): array
+    public function list_by_title(int $limit, int $offset, string $q = '', int $category_id = 0)
     {
-        $this->db->select('
-            posts.id,
-            posts.title,
-            posts.created_at,
-            users.username,
-            categories.name AS category_name,
-            COUNT(comments.id) AS comment_count
-        ');
-        $this->db->from('posts');
-        $this->db->join('users', 'users.id = posts.user_id');
-        $this->db->join('categories', 'categories.id = posts.category_id');
-        $this->db->join('comments', 'comments.post_id = posts.id AND comments.is_deleted = 0', 'left');
+        // 댓글 수 집계 서브쿼리
+        $sub = $this->db
+            ->select('post_id, COUNT(*) AS cnt', false)
+            ->from('comments')
+            ->where('is_deleted', 0)      // 쓰는 중이면
+            ->group_by('post_id')
+            ->get_compiled_select();
 
-        $this->db->where('posts.is_deleted', 0);
+        $this->db
+            ->select([
+                'p.id',
+                'p.title',
+                'p.created_at',
+                'p.user_id',
+                'u.username AS username',
+                'COALESCE(c.cnt, 0) AS comment_count',
+            ], false)
+            ->from('posts AS p')
+            ->join('users AS u', 'u.id = p.user_id', 'left')
+            ->join("({$sub}) AS c", 'c.post_id = p.id', 'left');
 
-        if (!empty($category_id)) {
-            $this->db->where('posts.category_id', (int)$category_id);
+        if ($category_id > 0) {
+            $this->db->where('p.category_id', $category_id);
         }
         if ($q !== '') {
-            $this->db->like('posts.title', $q, 'both');
+            $this->db->like('p.title', $q);
         }
+        // $this->db->where('p.is_deleted', 0); // 쓰고 있다면
 
-        $this->db->group_by('posts.id');
-
-        $this->db->order_by('posts.id', 'DESC');
-        $this->db->limit($limit, $offset);
-
-        return $this->db->get()->result();
+        return $this->db
+            ->order_by('p.id', 'DESC')
+            ->limit($limit, $offset)
+            ->get()->result();
     }
-
 }

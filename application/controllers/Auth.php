@@ -17,17 +17,14 @@ class Auth extends MY_Controller
         parent::__construct();
     }
 
-    /** 기본 엔드포인트 -> 로그인 폼으로 */
     public function index()
     {
         redirect('/auth/login');
         exit;
     }
 
-    /** 회원가입 폼 */
     public function register_form()
     {
-        // 페이지 전용 CSS만 등록
         $this->css('register_view.css', time());
 
         // 공통 값(BASE_CSS/CSS/JS/is_logged_in 등)은 renderEmpty()가 자동 주입
