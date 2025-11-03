@@ -139,6 +139,9 @@ class Comments extends MY_Controller
 
         $paged = $this->Comment_model->page_by_post($postId, $page, $ps);
 
+        $reply_to = $this->input->get('reply_to');
+        $reply_to = ($reply_to === null || $reply_to === '') ? null : (int)$reply_to;
+
         $this->template_->viewDefine('comment_list_stub', 'comment_list_stub.tpl');
         $this->template_->viewAssign([
             'post'          => (object)['id'=>$postId],
@@ -146,7 +149,7 @@ class Comments extends MY_Controller
             'page'          => $paged['page'],
             'total_pages'   => $paged['total_pages'],
             'session_user_id' => (int)$this->session->userdata('id'),
-            'reply_to' => null,
+            'reply_to' => $reply_to,
         ]);
         $html = $this->template_->viewFetch('comment_list_stub');
 

@@ -65,11 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------------- Page Loader ---------------------- */
 
-  const loadPage = async (p) => {
-    const res = await fetch(
-      `/ci-starter/comments/page?post_id=${getPostId()}&page=${p}`,
-      { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
-    );
+  const loadPage = async (p, replyTo = '') => {
+    const query =
+      `/ci-starter/comments/page?post_id=${getPostId()}&page=${p}`
+      + (replyTo ? `&reply_to=${replyTo}` : '');
+
+    const res = await fetch(query, {
+      headers: { 'X-Requested-With':'XMLHttpRequest' }
+    });
+
     const json = await res.json();
     if (!json.ok) {
       alert(json.msg || '댓글 페이지 로드 실패');
@@ -111,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHeader(d.total_count_active);
 
     // 서버가 계산한 실제 페이지로 조각 reload
-    await loadPage(d.page);
+    const replyTo = new URL(location.href).searchParams.get('reply_to') || '';
+    await loadPage(d.page, replyTo);
 
     // 포커스 이동
     setTimeout(() => {
@@ -141,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Number.isFinite(target) || target < 1) return;
 
     e.preventDefault();
-    loadPage(target);
+    const replyTo = new URL(location.href).searchParams.get('reply_to') || '';
+    loadPage(target, replyTo);
   });
 
   // 대댓글 + 삭제
