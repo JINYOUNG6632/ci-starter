@@ -9,7 +9,7 @@
     <div class="post-header">
       <h2 class="post-title">{post->title}</h2>
       <div class="post-meta">
-        <span class="post-author">작성자 #{post->user_id}</span>
+        <span class="post-author">작성자 : {post->username}</span>
         <span class="post-date">{post->created_at}</span>
       </div>
     </div>

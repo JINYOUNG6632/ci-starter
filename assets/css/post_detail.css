@@ -51,6 +51,10 @@ a:focus-visible, button:focus-visible {
   margin-top: 8px;
   color: var(--muted);
   font-size: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .post-body {
