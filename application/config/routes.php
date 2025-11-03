@@ -75,6 +75,7 @@ $route['posts/edit/(:num)']['post'] = 'posts/edit_process/$1';
 $route['comments/list']['get'] = 'comments/list';
 $route['comments/create']['post'] = 'comments/create';
 $route['comments/delete']['post'] = 'comments/delete';
+$route['comments/page/(:num)'] = 'comments/page/$1';
 
 //파일 다운로드
 $route['files/download/(:num)'] = 'files/download/$1';
