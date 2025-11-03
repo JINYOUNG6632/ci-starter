@@ -8,11 +8,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Files extends MY_Controller
 {
+
+    protected $models        = ['File_model'];
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('File_model');
-        $this->load->library('session');
     }
 
     /** 로그인 확인 (권한 체크용) */

@@ -8,11 +8,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Comments extends MY_Controller
 {
+
+    protected $models        = ['Comment_model'];
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Comment_model');
-        $this->load->library('session');
     }
 
     /** 댓글 작성 (루트/대댓글 공통) : POST */

@@ -13,18 +13,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Posts extends MY_Controller
 {
-    public $table = 'posts';
+    protected $models        = ['Post_model', 'Category_model', 'File_model', 'Comment_model'];
+    protected $commonModules = ['pagination_module'];
 
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Post_model');
-        $this->load->model('Category_model');
-        $this->load->model('File_model');
-        $this->load->model('Comment_model'); // ✅ 댓글 서버렌더 전환용
-        $this->load->library('pagination');
-        $this->load->library('session');
-        $this->load->helper(['url', 'form']);
     }
 
     private function _check_login()
