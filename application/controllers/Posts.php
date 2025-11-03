@@ -75,6 +75,8 @@ class Posts extends MY_Controller
         $this->template_->viewDefine('comment_list_stub', 'comment_list_stub.tpl');
         $this->template_->viewDefine('file_view',         'file_view.tpl');
 
+        $this->js('comments.js', time());
+
         // 화면 렌더
         $this->render('post_detail_view.tpl', [
             'post'                => $post,

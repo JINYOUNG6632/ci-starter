@@ -20,7 +20,7 @@
                   <input type="hidden" name="post_id" value="{post->id}">
                   <input type="hidden" name="comment_id" value="{comments->id}">
                   <input type="hidden" name="page" value="{page}">
-                  <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                  <button type="submit">삭제</button>
                 </form>
               {/}
             </div>

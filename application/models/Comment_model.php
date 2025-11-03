@@ -14,17 +14,6 @@ class Comment_model extends MY_Model {
      *  Nested Set 기반 목록/페이지
      * ========================= */
 
-    /**
-     * 전위순(lft ASC) 페이지네이션
-     * 반환:
-     *  [
-     *    'rows'        => stdClass[],
-     *    'total'       => int,
-     *    'total_pages' => int,
-     *    'page'        => int,
-     *    'page_size'   => int,
-     *  ]
-     */
     public function page_by_post($postId, $page = 1, $pageSize = 50)
     {
         $postId   = (int)$postId;
@@ -33,26 +22,37 @@ class Comment_model extends MY_Model {
 
         $offset = ($page - 1) * $pageSize;
 
-        // 표시 대상 총 개수 (소프트삭제 제외)
+        // 🔸 총 가시 댓글 수: is_deleted=0 OR 비삭제 자식 존재
         $totalRow = $this->db->query("
             SELECT COUNT(*) AS cnt
-            FROM comments
-            WHERE post_id = ? AND is_deleted = 0
+            FROM comments c
+            WHERE c.post_id = ?
+            AND (c.is_deleted = 0
+                OR EXISTS (
+                        SELECT 1 FROM comments x
+                        WHERE x.parent_id = c.id AND x.is_deleted = 0
+                ))
         ", [$postId])->row();
         $total = (int)$totalRow->cnt;
         $totalPages = (int)ceil(($total ?: 0) / $pageSize);
 
-        // 전위순 정렬: lft ASC
+        // 🔸 목록: 전위순 + 같은 가시성 규칙
         $rows = $this->db->query("
             SELECT c.id, c.post_id, c.user_id, c.parent_id,
-                   c.body, c.is_deleted, c.created_at, c.updated_at,
-                   c.lft, c.rgt, c.depth,
-                   u.username,
-                   /* 필요하면 캐시된 reply_count 대신 즉시 계산도 가능 */
-                   (SELECT COUNT(*) FROM comments x WHERE x.parent_id = c.id AND x.is_deleted = 0) AS reply_count
+                c.body, c.is_deleted, c.created_at, c.updated_at,
+                c.lft, c.rgt, c.depth,
+                u.username,
+                -- 비삭제 자식 수
+                (SELECT COUNT(*) FROM comments x
+                    WHERE x.parent_id = c.id AND x.is_deleted = 0) AS reply_count
             FROM comments c
             LEFT JOIN users u ON u.id = c.user_id
-            WHERE c.post_id = ? AND c.is_deleted = 0
+            WHERE c.post_id = ?
+            AND (c.is_deleted = 0
+                OR EXISTS (
+                        SELECT 1 FROM comments x
+                        WHERE x.parent_id = c.id AND x.is_deleted = 0
+                ))
             ORDER BY c.lft ASC
             LIMIT ? OFFSET ?
         ", [$postId, $pageSize, $offset])->result();
@@ -66,34 +66,37 @@ class Comment_model extends MY_Model {
         ];
     }
 
-    /**
-     * 특정 댓글이 전위순에서 몇 번째인지(lft 기반) → 페이지 계산
-     */
+
     public function calc_page_of_comment($postId, $commentId, $pageSize = 50)
     {
         $postId    = (int)$postId;
         $commentId = (int)$commentId;
         $pageSize  = max(1, (int)$pageSize);
 
-        // 대상 노드의 lft
         $node = $this->db->query("
             SELECT lft
             FROM comments
             WHERE id = ? AND post_id = ?
         ", [$commentId, $postId])->row();
-
         if (!$node) return 1;
 
-        // 나보다 앞(같은 포함)인 표시 가능한 댓글 수
+        // 🔸 나보다 앞(포함)인 '가시 댓글' 수
         $cntRow = $this->db->query("
             SELECT COUNT(*) AS cnt
-            FROM comments
-            WHERE post_id = ? AND is_deleted = 0 AND lft <= ?
+            FROM comments c
+            WHERE c.post_id = ?
+            AND c.lft <= ?
+            AND (c.is_deleted = 0
+                OR EXISTS (
+                        SELECT 1 FROM comments x
+                        WHERE x.parent_id = c.id AND x.is_deleted = 0
+                ))
         ", [$postId, (int)$node->lft])->row();
 
         $pos = (int)$cntRow->cnt;
         return max(1, (int)ceil($pos / $pageSize));
     }
+
 
     /* =========================
      *  Nested Set 기반 삽입/삭제
