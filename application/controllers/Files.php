@@ -16,16 +16,6 @@ class Files extends MY_Controller
         parent::__construct();
     }
 
-    /** 로그인 확인 (권한 체크용) */
-    private function _check_login()
-    {
-        if (!$this->session->userdata('logged_in')) {
-            $this->session->set_flashdata('error', '로그인이 필요합니다.');
-            redirect('auth/login');
-            exit;
-        }
-    }
-
     /** /files/download/{id} : 첨부 다운로드 */
     public function download($id)
     {

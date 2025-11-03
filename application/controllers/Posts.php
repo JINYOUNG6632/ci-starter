@@ -21,14 +21,6 @@ class Posts extends MY_Controller
         parent::__construct();
     }
 
-    private function _check_login()
-    {
-        if (!$this->session->userdata('logged_in')) {
-            $this->session->set_flashdata('error', '로그인이 필요합니다.');
-            redirect('auth/login');
-        }
-    }
-
     /** 목록 */
     public function index($category_id = 1)
     {
@@ -45,7 +37,6 @@ class Posts extends MY_Controller
         $total = $this->Post_model->count_by_title($q, $category_id);
 
         // --- 페이지네이션: 공통 모듈로 치환 --------------------
-        $this->load->library('common_modules', ['pagination_module']);
         $pg = $this->pagination_module->init([
             'base_url'             => site_url('posts/index/' . $category_id),
             'total_rows'           => $total,

@@ -162,4 +162,12 @@ class MY_Controller extends CI_Controller
         $aVars['test'] = array("test1" => "test1");
         $this->load->vars($aVars);
     }
+
+    protected function _check_login()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', '로그인이 필요합니다.');
+            redirect('auth/login');
+        }
+    }
 }
