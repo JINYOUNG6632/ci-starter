@@ -12,7 +12,7 @@ class Auth extends MY_Controller
 {
 
     protected $models        = ['User_model'];
-    
+
     public function __construct()
     {
         parent::__construct();
@@ -62,6 +62,7 @@ class Auth extends MY_Controller
         $this->User_model->create_user($username, $user_id, $hashed_password);
 
         redirect('auth/login');
+        exit;
     }
 
     public function login_form() {
@@ -112,9 +113,11 @@ class Auth extends MY_Controller
             $this->session->set_userdata($session_data);
 
             redirect('/posts');
+            exit;
         } else {
             $this->session->set_flashdata('error', '회원정보와 일치하지 않습니다.');
-            redirect('/auth/login'); 
+            redirect('/auth/login');
+            exit;
         }
     }
 

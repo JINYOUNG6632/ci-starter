@@ -219,6 +219,7 @@ class Posts extends MY_Controller
 
         // 3) 상세로 이동
         redirect('posts/view/' . $new_post_id);
+        exit;
     }
 
     /** 수정 폼 */
@@ -230,7 +231,7 @@ class Posts extends MY_Controller
         if (!$post || $post->user_id != $this->session->userdata('id')) {
             $this->session->set_flashdata('error', '수정권한이 없습니다.');
             redirect('posts/view/' . $post_id);
-            return;
+            exit;;
         }
 
         $categories  = $this->Category_model->get_all_categories();
@@ -270,7 +271,7 @@ class Posts extends MY_Controller
         if (!$post || $post->user_id != $this->session->userdata('id')) {
             $this->session->set_flashdata('error', '권한이 없습니다.');
             redirect('posts/view/' . $post_id);
-            return;
+            exit;
         }
 
         $this->form_validation->set_rules('category_id', '카테고리', 'required|integer');
@@ -305,6 +306,7 @@ class Posts extends MY_Controller
         $this->File_model->upload_and_attach($post_id, 'attachments');
 
         redirect('posts/view/' . $post_id);
+        exit;
     }
 
     /** 삭제 */
@@ -316,12 +318,13 @@ class Posts extends MY_Controller
         if (!$post || $post->user_id != $this->session->userdata('id')) {
             $this->session->set_flashdata('error', '권한이 없습니다.');
             redirect('posts/view/' . $post_id);
-            return;
+            exit;
         }
 
         // 게시글 삭제
         $this->Post_model->delete_post($post_id);
 
         redirect('posts');
+        exit;
     }
 }

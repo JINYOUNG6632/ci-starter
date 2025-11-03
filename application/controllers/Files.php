@@ -66,7 +66,7 @@ class Files extends MY_Controller
         if (!$f) {
             $this->session->set_flashdata('error', '파일을 찾을 수 없습니다.');
             redirect($_SERVER['HTTP_REFERER'] ?? '/ci-starter/posts');
-            return;
+            exit;
         }
 
         // 소유자 검증: 파일이 속한 게시글의 작성자와 현재 사용자 일치?
@@ -74,7 +74,7 @@ class Files extends MY_Controller
         if ((int)$f->post_owner_id !== $current_user_id) {
             $this->session->set_flashdata('error', '첨부를 삭제할 권한이 없습니다.');
             redirect($_SERVER['HTTP_REFERER'] ?? '/ci-starter/posts/view/'.$f->post_id);
-            return;
+            exit;;
         }
 
         // 소프트 삭제
@@ -84,5 +84,6 @@ class Files extends MY_Controller
         // 원래 페이지로 리다이렉트
         $back = $_SERVER['HTTP_REFERER'] ?? '/ci-starter/posts/view/'.$f->post_id;
         redirect($back);
+        exit;
     }
 }
