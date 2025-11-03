@@ -22,37 +22,28 @@ class Comment_model extends MY_Model {
 
         $offset = ($page - 1) * $pageSize;
 
-        // 🔸 총 가시 댓글 수: is_deleted=0 OR 비삭제 자식 존재
+        /** ✅ 삭제였더라도 자식이 있으면 보여야 함 → reply_count 사용 */
         $totalRow = $this->db->query("
             SELECT COUNT(*) AS cnt
             FROM comments c
             WHERE c.post_id = ?
-            AND (c.is_deleted = 0
-                OR EXISTS (
-                        SELECT 1 FROM comments x
-                        WHERE x.parent_id = c.id AND x.is_deleted = 0
-                ))
+            AND (c.is_deleted = 0 OR c.reply_count > 0)
         ", [$postId])->row();
         $total = (int)$totalRow->cnt;
         $totalPages = (int)ceil(($total ?: 0) / $pageSize);
 
-        // 🔸 목록: 전위순 + 같은 가시성 규칙
+        /** ✅ 목록 조회 최적화: 서브쿼리 제거, reply_count 직접 사용 */
         $rows = $this->db->query("
-            SELECT c.id, c.post_id, c.user_id, c.parent_id,
+            SELECT 
+                c.id, c.post_id, c.user_id, c.parent_id,
                 c.body, c.is_deleted, c.created_at, c.updated_at,
                 c.lft, c.rgt, c.depth,
                 u.username,
-                -- 비삭제 자식 수
-                (SELECT COUNT(*) FROM comments x
-                    WHERE x.parent_id = c.id AND x.is_deleted = 0) AS reply_count
+                c.reply_count
             FROM comments c
             LEFT JOIN users u ON u.id = c.user_id
             WHERE c.post_id = ?
-            AND (c.is_deleted = 0
-                OR EXISTS (
-                        SELECT 1 FROM comments x
-                        WHERE x.parent_id = c.id AND x.is_deleted = 0
-                ))
+            AND (c.is_deleted = 0 OR c.reply_count > 0)
             ORDER BY c.lft ASC
             LIMIT ? OFFSET ?
         ", [$postId, $pageSize, $offset])->result();
@@ -66,7 +57,6 @@ class Comment_model extends MY_Model {
         ];
     }
 
-
     public function calc_page_of_comment($postId, $commentId, $pageSize = 50)
     {
         $postId    = (int)$postId;
@@ -78,34 +68,26 @@ class Comment_model extends MY_Model {
             FROM comments
             WHERE id = ? AND post_id = ?
         ", [$commentId, $postId])->row();
+
         if (!$node) return 1;
 
-        // 🔸 나보다 앞(포함)인 '가시 댓글' 수
+        /** ✅ 가시 댓글 수 계산 (reply_count 활용) */
         $cntRow = $this->db->query("
             SELECT COUNT(*) AS cnt
             FROM comments c
             WHERE c.post_id = ?
-            AND c.lft <= ?
-            AND (c.is_deleted = 0
-                OR EXISTS (
-                        SELECT 1 FROM comments x
-                        WHERE x.parent_id = c.id AND x.is_deleted = 0
-                ))
+              AND c.lft <= ?
+              AND (c.is_deleted = 0 OR c.reply_count > 0)
         ", [$postId, (int)$node->lft])->row();
 
         $pos = (int)$cntRow->cnt;
         return max(1, (int)ceil($pos / $pageSize));
     }
 
-
     /* =========================
      *  Nested Set 기반 삽입/삭제
      * ========================= */
 
-    /**
-     * 댓글 생성 (루트/대댓글 공통) - Nested Set
-     * return: false | row_array (find_one_with_user 결과)
-     */
     public function create_comment($postId, $userId, $body, $parentId = null)
     {
         $postId   = (int)$postId;
@@ -116,7 +98,6 @@ class Comment_model extends MY_Model {
         $this->db->trans_start();
 
         if ($parentId === null) {
-            // 루트: post 내 가장 오른쪽(rgt)의 다음에 추가
             $maxRgt = $this->db->select('COALESCE(MAX(rgt), 0) AS mr', false)
                                ->from('comments')
                                ->where('post_id', $postId)
@@ -125,7 +106,6 @@ class Comment_model extends MY_Model {
             $rgt   = $lft + 1;
             $depth = 0;
         } else {
-            // 부모 잠금 (동시성)
             $parent = $this->db->query("
                 SELECT id, lft, rgt, depth
                 FROM comments
@@ -138,7 +118,6 @@ class Comment_model extends MY_Model {
                 return false;
             }
 
-            // 부모 rgt 기준으로 공간 2칸 벌리기 (부등호 주의!)
             $this->db->query("
                 UPDATE comments
                 SET rgt = rgt + 2
@@ -156,7 +135,6 @@ class Comment_model extends MY_Model {
             $depth = (int)$parent->depth + 1;
         }
 
-        // 삽입
         $this->db->insert('comments', [
             'post_id'    => $postId,
             'user_id'    => $userId,
@@ -168,10 +146,10 @@ class Comment_model extends MY_Model {
             'lft'        => $lft,
             'rgt'        => $rgt,
             'depth'      => $depth,
+            'reply_count'=> 0,
         ]);
         $newId = (int)$this->db->insert_id();
 
-        // (선택) 부모 reply_count 캐시 증가
         if ($parentId !== null) {
             $this->db->set('reply_count', 'reply_count + 1', false)
                      ->where('id', $parentId)
@@ -184,9 +162,6 @@ class Comment_model extends MY_Model {
         return $this->find_one_with_user($newId);
     }
 
-    /**
-     * 소프트 삭제 (본문 가림 / 트리 구조 유지)
-     */
     public function soft_delete_comment($commentId, $userId)
     {
         $this->db->set('is_deleted', 1)
@@ -199,11 +174,6 @@ class Comment_model extends MY_Model {
         return $this->db->affected_rows() > 0;
     }
 
-    /* =========================
-     *  조회 유틸
-     * ========================= */
-
-    /** 단일 댓글 + 유저명 (배열) */
     public function find_one_with_user($commentId)
     {
         return $this->db
@@ -214,7 +184,6 @@ class Comment_model extends MY_Model {
             ->get()->row_array();
     }
 
-    /** (보조) 노드 가져오기 */
     public function get_node_by_id($commentId)
     {
         return $this->db->select('id, post_id, parent_id, lft, rgt, depth')
